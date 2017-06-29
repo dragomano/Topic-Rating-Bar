@@ -1,11 +1,16 @@
 <?php
+
 /**
-* Topic Rating Bar © 2011-2013, Bugo
-* Admin-TopicRating.php
-* License http://opensource.org/licenses/artistic-license-2.0
-* http://dragomano.ru/page/topic-rating-bar and
-* http://custom.simplemachines.org/mods/index.php?mod=3236
-*/
+ * Admin-TopicRating.php
+ *
+ * @package Topic Rating Bar
+ * @link https://custom.simplemachines.org/mods/index.php?mod=3236
+ * @author Bugo https://dragomano.ru/mods/topic-rating-bar
+ * @copyright 2010-2017 Bugo
+ * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
+ *
+ * @version 0.9
+ */
 
 if (!defined('SMF'))
 	die('Hacking attempt...');
@@ -45,19 +50,22 @@ function trb_rating_settings()
 	$txt['tr_count_topics'] = sprintf($txt['tr_count_topics'], $scripturl);
 	
 	$config_vars = array(
+		array('select', 'tr_rate_system', $txt['tr_system_array']),
 		array('check', 'tr_show_best_topic'),
 		array('check', 'tr_mini_rating'),
 		array('int', 'tr_count_topics'),
 		array('title', 'tr_ignore_boards'),
 		array('callback', 'tr_ignored_boards'),
 		array('title', 'edit_permissions'),
-		array('permissions', 'rate_topics'),
+		array('permissions', 'rate_topics')
 	);
 	
 	// Saving?
 	if (isset($_GET['save'])) {
+		checkSession();
+		
 		if (empty($_POST['ignore_brd']))
-			$_POST['ignore_brd'] = array();
+			$_POST['ignore_brd'] = [];
 
 		unset($_POST['ignore_boards']);
 		if (isset($_POST['ignore_brd'])) {
@@ -75,9 +83,9 @@ function trb_rating_settings()
 			unset($_POST['ignore_brd']);
 		}
 		
-		checkSession();
 		saveDBSettings($config_vars);
 		updateSettings(array('tr_ignore_boards' => $_POST['ignore_boards']));
+		clean_cache();
 		redirectexit('action=admin;area=modsettings;sa=topic_rating');
 	}
 
@@ -97,39 +105,39 @@ function trb_rating_ignoreboards()
 		WHERE redirect = {string:empty_string}' . (!empty($modSettings['recycle_board']) ? '
 			AND b.id_board != {int:recycle_board}' : ''),
 		array(
-			'ignore_boards' => !empty($modSettings['tr_ignore_boards']) ? explode(',', $modSettings['tr_ignore_boards']) : array(),
+			'ignore_boards' => !empty($modSettings['tr_ignore_boards']) ? explode(',', $modSettings['tr_ignore_boards']) : [],
 			'recycle_board' => !empty($modSettings['recycle_board']) ? $modSettings['recycle_board'] : null,
-			'empty_string'  => '',
+			'empty_string'  => ''
 		)
 	);
 	
 	$context['num_boards'] = $smcFunc['db_num_rows']($request);
-	$context['categories'] = array();
+	$context['categories'] = [];
 	
 	while ($row = $smcFunc['db_fetch_assoc']($request))	{
 		if (!isset($context['categories'][$row['id_cat']]))
 			$context['categories'][$row['id_cat']] = array(
 				'id'     => $row['id_cat'],
 				'name'   => $row['cat_name'],
-				'boards' => array(),
+				'boards' => []
 			);
 
 		$context['categories'][$row['id_cat']]['boards'][$row['id_board']] = array(
 			'id'          => $row['id_board'],
 			'name'        => $row['name'],
 			'child_level' => $row['child_level'],
-			'selected'    => $row['is_ignored'],
+			'selected'    => $row['is_ignored']
 		);
 	}
 	$smcFunc['db_free_result']($request);
 
-	$temp_boards = array();
+	$temp_boards = [];
 	foreach ($context['categories'] as $category) {
 		$context['categories'][$category['id']]['child_ids'] = array_keys($category['boards']);
 
 		$temp_boards[] = array(
 			'name'      => $category['name'],
-			'child_ids' => array_keys($category['boards']),
+			'child_ids' => array_keys($category['boards'])
 		);
 		$temp_boards = array_merge($temp_boards, array_values($category['boards']));
 	}
@@ -138,14 +146,12 @@ function trb_rating_ignoreboards()
 	if ($max_boards == 1)
 		$max_boards = 2;
 
-	$context['board_columns'] = array();
+	$context['board_columns'] = [];
 	for ($i = 0; $i < $max_boards; $i++) {
 		$context['board_columns'][] = $temp_boards[$i];
 		if (isset($temp_boards[$i + $max_boards]))
 			$context['board_columns'][] = $temp_boards[$i + $max_boards];
 		else
-			$context['board_columns'][] = array();
+			$context['board_columns'][] = [];
 	}
 }
-
-?>

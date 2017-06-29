@@ -1,8 +1,8 @@
 /* Topic Rating Bar by Bugo */
 .unit-rating {
 	list-style: none;
-	margin: 3px 45% 2px auto;
-	padding: 0px;
+	margin: 3px 40% 2px auto;
+	padding: 0;
 	height: 25px;
 	position: relative;
 	background: url(../images/trb/all_stars.png) top left repeat-x;		
@@ -10,11 +10,11 @@
 }
 .unit-rating li {
 	text-indent: -90000px;
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0;
 	float: left;
 }
-.unit-rating li a {
+.unit-rating li span {
 	outline: none;
 	display: block;
 	width: 25px;
@@ -23,33 +23,34 @@
 	text-indent: -9000px;
 	z-index: 20;
 	position: absolute;
-	padding: 0px;
+	padding: 0;
 }
-.unit-rating li a:hover {
+.unit-rating li span.rater:hover {
 	background: url(../images/trb/all_stars.png) left center;
 	z-index: 2;
-	left: 0px;
+	left: 0;
+	cursor: pointer;
 }
-.unit-rating a.r1-unit{left:0px}
-.unit-rating a.r1-unit:hover{width:25px}
-.unit-rating a.r2-unit{left:25px}
-.unit-rating a.r2-unit:hover{width:50px}
-.unit-rating a.r3-unit{left:50px}
-.unit-rating a.r3-unit:hover{width:75px}
-.unit-rating a.r4-unit{left:75px}	
-.unit-rating a.r4-unit:hover{width:100px}
-.unit-rating a.r5-unit{left:100px}
-.unit-rating a.r5-unit:hover{width:125px}
-.unit-rating a.r6-unit{left:125px}
-.unit-rating a.r6-unit:hover{width:150px}
-.unit-rating a.r7-unit{left:150px}
-.unit-rating a.r7-unit:hover{width:175px}
-.unit-rating a.r8-unit{left:175px}
-.unit-rating a.r8-unit:hover{width:200px}
-.unit-rating a.r9-unit{left:200px}
-.unit-rating a.r9-unit:hover{width:225px}
-.unit-rating a.r10-unit{left:225px}
-.unit-rating a.r10-unit:hover{width:250px}
+.unit-rating span.r1-unit{left:0}
+.unit-rating span.r1-unit:hover{width:25px}
+.unit-rating span.r2-unit{left:25px}
+.unit-rating span.r2-unit:hover{width:50px}
+.unit-rating span.r3-unit{left:50px}
+.unit-rating span.r3-unit:hover{width:75px}
+.unit-rating span.r4-unit{left:75px}	
+.unit-rating span.r4-unit:hover{width:100px}
+.unit-rating span.r5-unit{left:100px}
+.unit-rating span.r5-unit:hover{width:125px}
+.unit-rating span.r6-unit{left:125px}
+.unit-rating span.r6-unit:hover{width:150px}
+.unit-rating span.r7-unit{left:150px}
+.unit-rating span.r7-unit:hover{width:175px}
+.unit-rating span.r8-unit{left:175px}
+.unit-rating span.r8-unit:hover{width:200px}
+.unit-rating span.r9-unit{left:200px}
+.unit-rating span.r9-unit:hover{width:225px}
+.unit-rating span.r10-unit{left:225px}
+.unit-rating span.r10-unit:hover{width:250px}
 .unit-rating li.current-rating {
 	background: url(../images/trb/all_stars.png) left bottom;
 	position: absolute;
@@ -64,10 +65,23 @@
 .title_barIC img.icon {
     float: left;
     margin: 5px 8px 0 0;
+	width: 20px;
 }
 .title_barIC .title {
 	float: right;
 	font-size: 0.9em;
 	font-weight: bold;
 	line-height: 31px;
+}
+@media screen and (max-width: 360px) {
+	.title_barIC .ie6_header {
+		display: none;
+	}
+	.unit-rating {
+		margin: 3px auto;
+		float: none;
+	}
+	.title_barIC .title {
+		display: none;
+	}
 }

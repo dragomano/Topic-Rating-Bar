@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * TopicRating.template.php
+ *
+ * @package Topic Rating Bar
+ * @link https://custom.simplemachines.org/mods/index.php?mod=3236
+ * @author Bugo https://dragomano.ru/mods/topic-rating-bar
+ * @copyright 2010-2017 Bugo
+ * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
+ *
+ * @version 0.9
+ */
+
 function template_rating()
 {
 	global $settings, $context, $txt;
@@ -46,7 +58,7 @@ function template_rating()
 			</tbody>
 		</table>
 	</div>
-	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"%3E%3C/script%3E\'))</script>
+	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		jQuery(document).ready(function($){
@@ -60,35 +72,49 @@ function template_rating()
 	
 	echo '
 	<br class="clear" />
-	<div class="smalltext centertext">Powered by <a href="http://dragomano.ru/page/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
+	<div class="smalltext centertext"><a href="//dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
 }
 
 function template_bar_above()
 {
-	global $context, $txt, $scripturl, $settings;
-	
-	if (!empty($context['proper_user'])) {
-		$rates = explode("|", $txt['tr_rates']);
-		
-		echo '
+	global $context, $modSettings, $txt, $scripturl, $settings;
+
+	$rates = explode("|", empty($modSettings['tr_rate_system']) ? $txt['tr_rates'] : $txt['tr_rates_10']);
+
+	if (empty($rates))
+		return;
+
+	$count = count($rates);
+
+	$header = '
 	<div class="title_barIC">
-		<span class="ie6_header ', $context['right_to_left'] ? 'floatright' : 'floatleft', '">
+		<span class="ie6_header ' . ($context['right_to_left'] ? 'floatright' : 'floatleft') . '">
 			<a href="' . $scripturl . '?action=rating" target="_blank">
-				<img class="icon" alt="" width="20" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png" />
+				<img class="icon" alt="" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png" />
 			</a>
-		</span>
-		<ul id="unit_ul' . $context['current_topic'] . '" class="unit-rating" style="width:' . $context['rating_bar']['unit_width'] * $context['rating_bar']['units'] . 'px;">
-			<li class="current-rating hreview-aggregate" style="width:' . $context['rating_bar']['rating_width'] . 'px;" title="' . $txt['tr_currently'] . $context['rating_bar']['current'] . '/' . $context['rating_bar']['units'] . '">
-				<span class="item"><span class="fn">' . $context['subject'] . '</span></span>
-				<span class="rating"><span class="average">' . $context['rating_bar']['current'] . '</span></span>
-				<span class="votes">' . count($context['rating_bar']['users']) . '</span>
+		</span>';
+
+	$footer = '
+	</div>';
+
+	if (!empty($context['proper_user'])) {
+		echo $header, '
+		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">
+			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+				<span class="item"><span class="fn">', $context['subject'], '</span></span>
+				<span class="rating">
+					<span class="average">', $context['rating_bar']['current'], '</span>
+					<span class="worst">0</span>
+					<span class="best">', $count, '</span>
+				</span>
+				<span class="votes">', count($context['rating_bar']['users']), '</span>
 			</li>';
 
 		for ($ncount = 1; $ncount <= $context['rating_bar']['units']; $ncount++) {
 			if (empty($context['rating_bar']['voted']))
 				echo '
 			<li>
-				<a href="' . $scripturl . '?action=trb_rate;stars=' . $ncount . ';topic=' . $context['current_topic'] . ';scale=' . $context['rating_bar']['units'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '" title="' . $rates[$ncount-1] . '" class="r' . $ncount . '-unit rater" rel="nofollow">' . $ncount . '</a>
+				<span title="', $rates[$ncount-1], '" class="r', $ncount, '-unit rater">', $ncount, '</span>
 			</li>';
 		}
 		
@@ -96,27 +122,42 @@ function template_bar_above()
 
 		echo '
 		</ul>
-		<span class="title">', empty($context['rating_bar']['voted']) ? $txt['tr_rate_pl'] : $txt['tr_currently'], '&nbsp;</span>
-	</div>';
-	}
-	else if ($context['rating_bar']['current'] > 0)	{
-		echo '
-	<div class="title_barIC">
-		<span class="ie6_header ', $context['right_to_left'] ? 'floatright' : 'floatleft', '">
-			<a href="' . $scripturl . '?action=rating" target="_blank">
-				<img class="icon" alt="" width="20" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png" />
-			</a>
-		</span>
-		<ul id="unit_ul' . $context['current_topic'] . '" class="unit-rating" style="width:' . $context['rating_bar']['unit_width'] * $context['rating_bar']['units'] . 'px;" title="' . $txt['tr_currently'] . $context['rating_bar']['current'] . '/' . $context['rating_bar']['units'] . '">
-			<li class="current-rating hreview-aggregate" style="width:' . $context['rating_bar']['rating_width'] . 'px;">
-				<span class="item"><span class="fn">' . $context['subject'] . '</span></span>
-				<span class="rating"><span class="average">' . $context['rating_bar']['current'] . '</span></span>
-				<span class="votes">' . count($context['rating_bar']['users']) . '</span>
+		<span class="title">', empty($context['rating_bar']['voted']) ? $txt['tr_rate_pl'] : $txt['tr_currently'], '&nbsp;</span>', $footer;
+	} elseif ($context['rating_bar']['current'] > 0) {
+		echo $header, '
+		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;">
+				<span class="item"><span class="fn">', $context['subject'], '</span></span>
+				<span class="rating">
+					<span class="average">', $context['rating_bar']['current'], '</span>
+					<span class="worst">0</span>
+					<span class="best">', $count, '</span>
+				</span>
+				<span class="votes">', count($context['rating_bar']['users']), '</span>
 			</li>
 		</ul>
-		<span class="title">', $txt['tr_currently'], '&nbsp;</span>
-	</div>';
+		<span class="title">', $txt['tr_currently'], '&nbsp;</span>', $footer;
 	}
+
+	echo '
+	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
+	<script type="text/javascript">
+		var work = "', $scripturl, '?action=trb_rate";
+		jQuery(document).ready(function($){
+			$("#unit_ul', $context['current_topic'], ' li > span").on("click", function(){
+				var rating = $(this).text();
+				$.post(work, {stars: rating, topic: ', $context['current_topic'], ', user: ', $context['user']['id'], '});
+				$("#unit_ul', $context['current_topic'], '").replaceWith(\'<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">\' +
+			\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ', $context['rating_bar']['unit_width'], ') + \'px;">\' +
+				\'<span class="item"><span class="fn">', $context['subject'], '</span></span>\' +
+				\'<span class="rating">\' +
+					\'<span class="average">\' + rating + \'</span>\' +
+				\'</span>\' +
+				\'<span class="votes">', count($context['rating_bar']['users']), '</span>\' +
+			\'</li></ul>\').blur();
+			});
+		});
+	</script>';
 }
 
 function template_bar_below()

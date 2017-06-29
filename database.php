@@ -39,17 +39,20 @@ $tables[] = array(
 		)
 	),
 	'indexes' => array(
-		0 => array(
-			'type'    => 'primary',
+		array(
+			'type'    => 'unique',
 			'columns' => array('id'),
 		),
+		array(
+			'type' => 'index',
+			'columns' => array('total_votes', 'total_value'),
+		)
 	),
 );
 
 db_extend('packages');
 
-foreach($tables as $table)
-{
+foreach($tables as $table) {
 	$smcFunc['db_create_table']('{db_prefix}' . $table['name'], $table['columns'], $table['indexes'], array(), 'update');
 	if (isset($table['default']))
 		$smcFunc['db_insert']('ignore', '{db_prefix}' . $table['name'], $table['default']['columns'], $table['default']['values'], $table['default']['keys']);

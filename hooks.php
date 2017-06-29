@@ -9,15 +9,8 @@ if ((SMF == 'SSI') && !$user_info['is_admin'])
 	die('Admin privileges required.');
 	
 $hooks = array(
-	'integrate_pre_include'          => '$sourcedir/Subs-TopicRating.php',
-	'integrate_admin_include'        => '$sourcedir/Admin-TopicRating.php',
-	'integrate_admin_areas'          => 'trb_rating_admin_areas',
-	'integrate_modify_modifications' => 'trb_rating_modifications',
-	'integrate_actions'              => 'trb_rating_actions',
-	'integrate_load_theme'           => 'trb_rating_load_theme',
-	'integrate_load_permissions'     => 'trb_rating_permissions',
-	'integrate_menu_buttons'         => 'trb_rating_preload',
-	'integrate_messageindex_buttons' => 'trb_rating_messageindex',
+	'integrate_pre_include' => '$sourcedir/Subs-TopicRating.php',
+	'integrate_pre_load'    => 'trb_rating_hooks'
 );
 
 if (!empty($context['uninstalling']))
