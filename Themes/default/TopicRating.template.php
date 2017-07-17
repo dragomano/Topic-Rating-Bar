@@ -9,7 +9,7 @@
  * @copyright 2010-2017 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 0.9
+ * @version 1.0
  */
 
 function template_rating()
@@ -19,10 +19,8 @@ function template_rating()
 	echo '
 	<div class="cat_bar">
 		<h3 class="catbg">
-			<span class="ie6_header floatleft">
-				<img class="icon" width="16" src="', $settings['default_images_url'], '/trb/statistics.png" alt="" />
-				', $txt['tr_top_topics'], '
-			</span>
+			<img class="icon" width="16" src="', $settings['default_images_url'], '/trb/statistics.png" alt="">
+			', $txt['tr_top_topics'], '
 		</h3>
 	</div>';
 	
@@ -58,7 +56,6 @@ function template_rating()
 			</tbody>
 		</table>
 	</div>
-	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		jQuery(document).ready(function($){
@@ -71,7 +68,7 @@ function template_rating()
 	<p class="information">', $txt['tr_top_empty'], '</p>';
 	
 	echo '
-	<br class="clear" />
+	<br class="clear">
 	<div class="smalltext centertext"><a href="//dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
 }
 
@@ -87,12 +84,7 @@ function template_bar_above()
 	$count = count($rates);
 
 	$header = '
-	<div class="title_barIC">
-		<span class="ie6_header ' . ($context['right_to_left'] ? 'floatright' : 'floatleft') . '">
-			<a href="' . $scripturl . '?action=rating" target="_blank">
-				<img class="icon" alt="" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png" />
-			</a>
-		</span>';
+	<div class="topic_rating_div">';
 
 	$footer = '
 	</div>';
@@ -121,8 +113,7 @@ function template_bar_above()
 		$ncount = 0;
 
 		echo '
-		</ul>
-		<span class="title">', empty($context['rating_bar']['voted']) ? $txt['tr_rate_pl'] : $txt['tr_currently'], '&nbsp;</span>', $footer;
+		</ul>', $footer;
 	} elseif ($context['rating_bar']['current'] > 0) {
 		echo $header, '
 		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
@@ -135,12 +126,10 @@ function template_bar_above()
 				</span>
 				<span class="votes">', count($context['rating_bar']['users']), '</span>
 			</li>
-		</ul>
-		<span class="title">', $txt['tr_currently'], '&nbsp;</span>', $footer;
+		</ul>', $footer;
 	}
 
 	echo '
-	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript">
 		var work = "', $scripturl, '?action=trb_rate";
 		jQuery(document).ready(function($){
@@ -170,48 +159,28 @@ function template_best_topics_above()
 	
 	echo '
 	<div id="best_topics">
-		<table class="table_list">
-			<tbody class="header">
-				<tr>
-					<td colspan="4">
-						<div class="cat_bar">
-							<h3 class="catbg">', $txt['tr_best_topic'], '</h3>
-						</div>
-					</td>
-				</tr>
-			</tbody>
-			<tbody class="content">
-				<tr class="windowbg2">
-					<td rowspan="2" class="icon windowbg">
-						<img alt="" src="', $settings['default_images_url'], '/trb/best_topic.png" />
-					</td>
-					<td class="info">
-						', $context['best_topic']['topic'], '
-						<p class="smalltext">', $txt['tr_rating'], ' ', $context['best_topic']['rating'], '</p>
-					</td>
-					<td class="stats windowbg">
-						<p>', $txt['posts'], ': ', $context['best_topic']['replies'], '<br />
-						', $txt['tr_votes'], ': ', $context['best_topic']['votes'], '
-						</p>
-					</td>
-					<td class="lastpost">
-						<p><strong>', $txt['last_post'], '</strong> ', $txt['by'], ' ', $context['best_topic']['member'], '<br />
-						', $txt['in'], ' ', $context['best_topic']['last_post'], '<br />
-						', $context['best_topic']['time'], '</p>
-					</td>
-				</tr>
-				<tr>
-					<td class="children windowbg" colspan="3">
-						<a href="', $scripturl, '?action=rating">', $txt['tr_other_topics'], '</a>
-					</td>
-				</tr>
-			</tbody>
-			<tbody class="divider">
-				<tr>
-					<td colspan="4"></td>
-				</tr>
-			</tbody>
-		</table>
+		<div class="cat_bar">
+			<h3 class="catbg">', $txt['tr_best_topic'], '</h3>
+		</div>
+		<div>
+			<div class="up_contain">
+				<div class="board_icon">
+					<img alt="" src="', $settings['default_images_url'], '/trb/best_topic.png">
+				</div>
+				<div class="info">
+					<p class="floatleft board_description">', $context['best_topic']['topic'], '<br>
+					', $txt['tr_rating'], ' ', $context['best_topic']['rating'], '</p>
+					<p class="floatright"><a href="', $scripturl, '?action=rating">', $txt['tr_other_topics'], '</a></p>
+				</div>
+				<div class="board_stats">
+					<p>', $txt['posts'], ': ', $context['best_topic']['replies'], '<br>', $txt['tr_votes'], ': ', $context['best_topic']['votes'], '</p>
+				</div>
+				<div class="lastpost lpr_border">
+					<p><strong>', $txt['last_post'], ':</strong> ', $context['best_topic']['time'], '<br>
+					', $context['best_topic']['last_post'], ' ', $txt['by'], ' ', $context['best_topic']['member'], '</p>
+				</div>
+			</div>
+		</div>
 	</div>';
 }
 
@@ -269,8 +238,6 @@ function template_callback_tr_ignored_boards()
 
 	echo '
 		</ul>
-		<br class="clear" />
+		<br class="clear">
 		<dl><dt></dt><dd></dd>';
 }
-
-?>

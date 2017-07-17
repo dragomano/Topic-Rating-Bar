@@ -6,7 +6,7 @@
 	<version>1.0</version>
 	<type>modification</type>
 	
-	<install for="2.0 - 2.0.99">
+	<install for="SMF 2.1 Beta 3, SMF 2.1 Beta 4, 2.1 - 2.1.99">
 		<readme parsebbc="true" lang="russian-utf8">readme/russian-utf8.txt</readme>
 		<readme parsebbc="true" lang="russian">readme/russian.txt</readme>
 		<readme parsebbc="true">readme/readme.txt</readme>
@@ -17,7 +17,7 @@
 		<redirect url="?action=admin;area=modsettings;sa=topic_rating" timeout="1000" />
 	</install>
 	
-	<uninstall for="2.0 - 2.0.99">
+	<uninstall for="SMF 2.1 Beta 3, SMF 2.1 Beta 4, 2.1 - 2.1.99">
 		<code>hooks.php</code>
 		<remove-file name="$themedir/css/trb_styles.css" />
 		<remove-file name="$themedir/scripts/jquery.tablesorter.min.js" />

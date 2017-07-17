@@ -1,12 +1,11 @@
 /* Topic Rating Bar by Bugo */
 .unit-rating {
 	list-style: none;
-	margin: 3px 40% 2px auto;
 	padding: 0;
 	height: 25px;
 	position: relative;
-	background: url(../images/trb/all_stars.png) top left repeat-x;		
-	float: right;
+	background: url(../images/trb/all_stars.png) top left repeat-x;
+	margin-left: 3em;
 }
 .unit-rating li {
 	text-indent: -90000px;
@@ -73,15 +72,24 @@
 	font-weight: bold;
 	line-height: 31px;
 }
+.topic_rating_div {
+	position: absolute;
+	right: 50%;
+	padding: 12px 16px;
+}
 @media screen and (max-width: 360px) {
-	.title_barIC .ie6_header {
+	.topic_rating_div {
 		display: none;
-	}
-	.unit-rating {
-		margin: 3px auto;
-		float: none;
 	}
 	.title_barIC .title {
 		display: none;
+	}
+}
+@media screen and (max-width: 1024px) {
+	.topic_rating_div {
+		right: 6%;
+	}
+	.unit-rating {
+		float: right;
 	}
 }
