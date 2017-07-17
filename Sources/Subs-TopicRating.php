@@ -9,11 +9,14 @@
  * @copyright 2010-2017 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 0.9
+ * @version 1.0
  */
 
 if (!defined('SMF'))
 	die('Hacking attempt...');
+
+if (!defined('WIRELESS'))
+    define('WIRELESS', false);
 
 define('TRB_CDN', '//cdn.jsdelivr.net/jquery/3/jquery.min.js');
 
@@ -98,6 +101,11 @@ function trb_rating_preload()
 
 				if (!empty($context['topic_rating']))
 					$context['html_headers'] .= "\n\t" . '<style type="text/css">
+		.topic_stars_main {
+			float: right;
+			margin-right: 50px;
+			margin-top: 10px;
+		}
 		.topic_stars {
 			background-image: url(' . $settings['default_images_url'] . '/trb/one_star.png);
 			background-repeat: no-repeat;
@@ -108,7 +116,7 @@ function trb_rating_preload()
 			}
 
 			// Display bar
-			if (!empty($_REQUEST['topic']) && empty($context['current_action']) && empty($board_info['error'])) {
+			if (!empty($context['current_topic']) && empty($context['current_action']) && empty($board_info['error'])) {
 				loadTemplate(false, 'trb_styles');				
 				$context['rating_bar'] = [];
 				trb_rating_bar();
@@ -121,9 +129,6 @@ function trb_rating_preload()
 function trb_rating_bar($unit_width = 25)
 {
 	global $smcFunc, $context, $modSettings, $topicinfo;
-
-	if (empty($context['current_topic']))
-		return;
 
 	$query = $smcFunc['db_query']('', '
 		SELECT total_votes, total_value, user_ids
@@ -165,28 +170,41 @@ function trb_rating_bar($unit_width = 25)
 // Loading from trb_rating_preload
 function trb_rating_messageindex()
 {
-	global $context, $txt, $settings;
+	global $forum_version, $context, $txt, $settings;
+
+	$version = substr($forum_version, 6, 1);
 
 	if (!empty($context['topic_rating'])) {
-		$cdn = '//cdn.jsdelivr.net/g/jquery@3,jquery.migrate@1';
+		if (empty($version)) {
+			$cdn = '//cdn.jsdelivr.net/g/jquery@3,jquery.migrate@1';
 
-		$context['insert_after_template'] .= '
+			$context['insert_after_template'] .= '
 	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="' . $cdn . '"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		$star = jQuery.noConflict();
 		$star(document).ready(function($){';
+		} else {
+			$context['insert_after_template'] .= '
+	<script type="text/javascript"><!-- // --><![CDATA[
+		jQuery(document).ready(function($){';
+		}
 
 		foreach ($context['topic_rating'] as $topic => $data) {
 			$rating = ($data['votes'] == 0) ? 0 : number_format($data['value'] / $data['votes'], 0);
 			
 			$img = '';
 			for ($i = 0; $i < $rating; $i++)
-				//$img .= '<img src="' . $settings['default_images_url'] . '/trb/one_star.png" alt="" />';
-				$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;<span>';
+				$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
+
+			if (empty($version))
+				$context['insert_after_template'] .= '
+			var starImg' . $topic . ' = $star("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
+			else
+				$context['insert_after_template'] .= '
+			var starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
 
 			$context['insert_after_template'] .= '
-			var starImg' . $topic . ' = $star("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");
-			starImg' . $topic . '.before(\'<span class="floatright" style="margin-right: 50px" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['votes'] . '">' . $img . '</span>\');';
+			starImg' . $topic . '.before(\'<span class="topic_stars_main" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['votes'] . '">' . $img . '</span>\');';
 		}
 
 		$context['insert_after_template'] .= '

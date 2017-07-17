@@ -3,20 +3,15 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:TopicRatingBar</id>
 	<name>Topic Rating Bar</name>
-	<version>0.9</version>
+	<version>1.0</version>
 	<type>modification</type>
 	
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true" lang="russian-utf8">readme/russian-utf8.txt</readme>
 		<readme parsebbc="true" lang="russian">readme/russian.txt</readme>
 		<readme parsebbc="true">readme/readme.txt</readme>
-		<require-dir name="default/css" destination="$themedir" />
-		<require-dir name="default/images/trb" destination="$themedir/images" />
-		<require-dir name="default/languages" destination="$themedir" />
-		<require-dir name="default/scripts" destination="$themedir" />
-		<require-file name="default/TopicRating.template.php" destination="$themedir" />
-		<require-file name="engine/Admin-TopicRating.php" destination="$sourcedir" />
-		<require-file name="engine/Subs-TopicRating.php" destination="$sourcedir" />
+		<require-dir name="Themes" destination="$boarddir" />
+		<require-dir name="Sources" destination="$boarddir" />
 		<database>database.php</database>
 		<code>hooks.php</code>
 		<redirect url="?action=admin;area=modsettings;sa=topic_rating" timeout="1000" />
@@ -25,12 +20,12 @@
 	<uninstall for="2.0 - 2.0.99">
 		<code>hooks.php</code>
 		<remove-file name="$themedir/css/trb_styles.css" />
-		<remove-dir name="$themedir/images/trb" />
 		<remove-file name="$themedir/scripts/jquery.tablesorter.min.js" />
 		<remove-file name="$themedir/TopicRating.template.php" />
 		<remove-file name="$sourcedir/Admin-TopicRating.php" />
 		<remove-file name="$sourcedir/Subs-TopicRating.php" />
-		<remove-dir name="$languagedir/TopicRating" />
+        <remove-dir name="$languagedir/TopicRating" />
+        <remove-dir name="$themedir/images/trb" />		
 		<redirect url="?action=admin;area=packages;sa=browse" timeout="1000" />
 	</uninstall>
 	
