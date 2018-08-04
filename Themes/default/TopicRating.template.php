@@ -6,16 +6,16 @@
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2010-2017 Bugo
+ * @copyright 2010-2018 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 0.9
+ * @version 1.1
  */
 
 function template_rating()
 {
 	global $settings, $context, $txt;
-	
+
 	echo '
 	<div class="cat_bar">
 		<h3 class="catbg">
@@ -25,7 +25,7 @@ function template_rating()
 			</span>
 		</h3>
 	</div>';
-	
+
 	if (!empty($context['top_rating']))	{
 		echo '
 	<p class="information">', $txt['tr_top_desc'], '</p>
@@ -42,7 +42,7 @@ function template_rating()
 				</tr>
 			</thead>
 			<tbody>';
-		
+
 		foreach ($context['top_rating'] as $id => $data) {
 			echo '
 				<tr>
@@ -69,7 +69,7 @@ function template_rating()
 	else
 		echo '
 	<p class="information">', $txt['tr_top_empty'], '</p>';
-	
+
 	echo '
 	<br class="clear" />
 	<div class="smalltext centertext"><a href="//dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
@@ -99,44 +99,44 @@ function template_bar_above()
 
 	if (!empty($context['proper_user'])) {
 		echo $header, '
-		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">
-			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
-				<span class="item"><span class="fn">', $context['subject'], '</span></span>
-				<span class="rating">
-					<span class="average">', $context['rating_bar']['current'], '</span>
-					<span class="worst">0</span>
-					<span class="best">', $count, '</span>
-				</span>
-				<span class="votes">', count($context['rating_bar']['users']), '</span>
-			</li>';
+	<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">
+		<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+			<span class="item"><span class="fn">', $context['subject'], '</span></span>
+			<span class="rating">
+				<span class="average">', $context['rating_bar']['current'], '</span>
+				<span class="worst">0</span>
+				<span class="best">', $count, '</span>
+			</span>
+			<span class="votes">', count($context['rating_bar']['users']), '</span>
+		</li>';
 
 		for ($ncount = 1; $ncount <= $context['rating_bar']['units']; $ncount++) {
 			if (empty($context['rating_bar']['voted']))
 				echo '
-			<li>
-				<span title="', $rates[$ncount-1], '" class="r', $ncount, '-unit rater">', $ncount, '</span>
-			</li>';
+		<li>
+			<span title="', $rates[$ncount-1], '" class="r', $ncount, '-unit rater">', $ncount, '</span>
+		</li>';
 		}
-		
+
 		$ncount = 0;
 
 		echo '
-		</ul>
-		<span class="title">', empty($context['rating_bar']['voted']) ? $txt['tr_rate_pl'] : $txt['tr_currently'], '&nbsp;</span>', $footer;
+	</ul>
+	<span class="title">', empty($context['rating_bar']['voted']) ? $txt['tr_rate_pl'] : $txt['tr_currently'], '&nbsp;</span>', $footer;
 	} elseif ($context['rating_bar']['current'] > 0) {
 		echo $header, '
-		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
-			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;">
-				<span class="item"><span class="fn">', $context['subject'], '</span></span>
-				<span class="rating">
-					<span class="average">', $context['rating_bar']['current'], '</span>
-					<span class="worst">0</span>
-					<span class="best">', $count, '</span>
-				</span>
-				<span class="votes">', count($context['rating_bar']['users']), '</span>
-			</li>
-		</ul>
-		<span class="title">', $txt['tr_currently'], '&nbsp;</span>', $footer;
+	<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+		<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;">
+			<span class="item"><span class="fn">', $context['subject'], '</span></span>
+			<span class="rating">
+				<span class="average">', $context['rating_bar']['current'], '</span>
+				<span class="worst">0</span>
+				<span class="best">', $count, '</span>
+			</span>
+			<span class="votes">', count($context['rating_bar']['users']), '</span>
+		</li>
+	</ul>
+	<span class="title">', $txt['tr_currently'], '&nbsp;</span>', $footer;
 	}
 
 	echo '
@@ -167,7 +167,7 @@ function template_bar_below()
 function template_best_topics_above()
 {
 	global $txt, $settings, $scripturl, $context;
-	
+
 	echo '
 	<div id="best_topics">
 		<table class="table_list">
@@ -222,14 +222,14 @@ function template_best_topics_below()
 function template_callback_tr_ignored_boards()
 {
 	global $context;
-	
+
 	echo '
 		<dt></dt><dd></dd></dl>
 		<ul class="ignoreboards floatleft" style="margin-top: -30px">';
 
 	$i = 0;
 	$limit = ceil($context['num_boards'] / 2);
-	
+
 	foreach ($context['categories'] as $category) {
 		if ($i == $limit) {
 			echo '
@@ -272,5 +272,3 @@ function template_callback_tr_ignored_boards()
 		<br class="clear" />
 		<dl><dt></dt><dd></dd>';
 }
-
-?>

@@ -7,10 +7,10 @@ elseif(!defined('SMF'))
 
 if ((SMF == 'SSI') && !$user_info['is_admin'])
 	die('Admin privileges required.');
-	
+
 $hooks = array(
-	'integrate_pre_include' => '$sourcedir/Subs-TopicRating.php',
-	'integrate_pre_load'    => 'trb_rating_hooks'
+	'integrate_pre_include' => '$sourcedir/Class-TopicRating.php',
+	'integrate_pre_load'    => 'TopicRating::hooks'
 );
 
 if (!empty($context['uninstalling']))
@@ -21,8 +21,6 @@ else
 
 foreach ($hooks as $hook => $function)
 	$call($hook, $function);
-	
+
 if (SMF == 'SSI')
 	echo 'Database changes are complete! Please wait...';
-
-?>
