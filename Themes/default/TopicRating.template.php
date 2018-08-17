@@ -65,14 +65,13 @@ function template_rating()
 			$(".table_grid").tablesorter();
 		});
 	// ]]></script>';
-	}
-	else
+	} else
 		echo '
 	<p class="information">', $txt['tr_top_empty'], '</p>';
 
 	echo '
 	<br class="clear" />
-	<div class="smalltext centertext"><a href="//dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
+	<div class="smalltext centertext"><a href="https://dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
 }
 
 function template_bar_above()
