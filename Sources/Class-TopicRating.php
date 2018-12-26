@@ -9,7 +9,7 @@
  * @copyright 2010-2018 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 1.1
+ * @version 1.1.1
  */
 
 if (!defined('SMF'))
@@ -43,7 +43,7 @@ class TopicRating
 	{
 		global $context, $modSettings, $smcFunc, $board_info, $settings;
 
-		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action']) && !WIRELESS || $context['current_action'] == 'forum') {
+		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action']) && (defined('WIRELESS') && !WIRELESS) || $context['current_action'] == 'forum') {
 			self::ratingBestTopic();
 
 			if (!empty($context['best_topic']))	{
@@ -52,12 +52,13 @@ class TopicRating
 				if (isset($context['template_layers'][2]) && $context['template_layers'][2] == 'portal') {
 					$context['template_layers'][]  = 'portal';
 					$context['template_layers'][2] = 'best_topics';
-				} else
+				} else {
 					$context['template_layers'][] = 'best_topics';
+				}
 			}
 		}
 
-		if (!empty($context['current_board']) && !WIRELESS)	{
+		if (!empty($context['current_board']) && (defined('WIRELESS') && !WIRELESS)) {
 			$context['rating_bar']   = [];
 			$context['topic_rating'] = [];
 			$rating_ignore_boards    = [];
@@ -70,7 +71,7 @@ class TopicRating
 
 			if (!in_array($context['current_board'], $rating_ignore_boards)) {
 				// Message Index
-				if (!empty($modSettings['tr_mini_rating'])) {
+				if (!empty($modSettings['tr_mini_rating']) && empty($context['current_topic'])) {
 					if (empty($context['no_topic_listing']) && !isset($_REQUEST['action']))	{
 						if (!empty($context['topics']))	{
 							$topics = array_keys($context['topics']);

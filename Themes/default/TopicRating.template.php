@@ -9,7 +9,7 @@
  * @copyright 2010-2018 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 1.1
+ * @version 1.1.1
  */
 
 function template_rating()
@@ -83,7 +83,7 @@ function template_bar_above()
 	if (empty($rates))
 		return;
 
-	$count = count($rates);
+	$count = is_array($rates) ? count($rates) : 0;
 
 	$header = '
 	<div class="title_barIC">
@@ -106,7 +106,7 @@ function template_bar_above()
 				<span class="worst">0</span>
 				<span class="best">', $count, '</span>
 			</span>
-			<span class="votes">', count($context['rating_bar']['users']), '</span>
+			<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
 		</li>';
 
 		for ($ncount = 1; $ncount <= $context['rating_bar']['units']; $ncount++) {
@@ -132,7 +132,7 @@ function template_bar_above()
 				<span class="worst">0</span>
 				<span class="best">', $count, '</span>
 			</span>
-			<span class="votes">', count($context['rating_bar']['users']), '</span>
+			<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
 		</li>
 	</ul>
 	<span class="title">', $txt['tr_currently'], '&nbsp;</span>', $footer;
@@ -152,7 +152,7 @@ function template_bar_above()
 				\'<span class="rating">\' +
 					\'<span class="average">\' + rating + \'</span>\' +
 				\'</span>\' +
-				\'<span class="votes">', count($context['rating_bar']['users']), '</span>\' +
+				\'<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>\' +
 			\'</li></ul>\').blur();
 			});
 		});
