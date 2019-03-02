@@ -1,21 +1,9 @@
 <?php
 
-/**
- * TopicRating.template.php
- *
- * @package Topic Rating Bar
- * @link https://custom.simplemachines.org/mods/index.php?mod=3236
- * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2010-2017 Bugo
- * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
- *
- * @version 1.0
- */
-
 function template_rating()
 {
 	global $settings, $context, $txt;
-	
+
 	echo '
 	<div class="cat_bar">
 		<h3 class="catbg">
@@ -23,7 +11,7 @@ function template_rating()
 			', $txt['tr_top_topics'], '
 		</h3>
 	</div>';
-	
+
 	if (!empty($context['top_rating']))	{
 		echo '
 	<p class="information">', $txt['tr_top_desc'], '</p>
@@ -31,45 +19,45 @@ function template_rating()
 		<table class="table_grid">
 			<thead>
 				<tr class="catbg">
-					<th class="first_th" scope="col">', $txt['topic'], '</th>
-					<th scope="col">', $txt['board'], '</th>
-					<th scope="col">', $txt['author'], '</th>
-					<th scope="col">', $txt['position'], '</th>
-					<th scope="col">', $txt['tr_average'], '</th>
-					<th class="last_th" scope="col">', $txt['tr_votes'], '</th>
+					<th>', $txt['topic'], '</th>
+					<th>', $txt['board'], '</th>
+					<th>', $txt['author'], '</th>
+					<th>', $txt['position'], '</th>
+					<th>', $txt['tr_average'], '</th>
+					<th>', $txt['tr_votes'], '</th>
 				</tr>
 			</thead>
 			<tbody>';
-		
+
 		foreach ($context['top_rating'] as $id => $data) {
 			echo '
-				<tr>
-					<td class="windowbg2">', $data['topic'], '</td>
-					<td class="windowbg">', $data['board'], '</td>
-					<td class="windowbg2">', $data['author'], '</td>
-					<td class="windowbg">', $data['group'], '</td>
-					<td class="windowbg2">', $data['rating'], '</td>
-					<td class="windowbg">', $data['votes'], '</td>
+				<tr class="windowbg">
+					<td>', $data['topic'], '</td>
+					<td>', $data['board'], '</td>
+					<td>', $data['author'], '</td>
+					<td>', $data['group'], '</td>
+					<td>', $data['rating'], '</td>
+					<td>', $data['votes'], '</td>
 				</tr>';
 		}
 		echo '
 			</tbody>
 		</table>
 	</div>
-	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/jquery.tablesorter.min.js"></script>
-	<script type="text/javascript"><!-- // --><![CDATA[
-		jQuery(document).ready(function($){
+	<script src="', $settings['default_theme_url'], '/scripts/jquery.tablesorter.min.js"></script>
+	<script>
+		jQuery(document).ready(function($) {
 			$(".table_grid").tablesorter();
 		});
-	// ]]></script>';
+	</script>';
 	}
 	else
 		echo '
 	<p class="information">', $txt['tr_top_empty'], '</p>';
-	
+
 	echo '
 	<br class="clear">
-	<div class="smalltext centertext"><a href="//dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
+	<div class="smalltext centertext"><a href="https://dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
 }
 
 function template_bar_above()
@@ -81,7 +69,7 @@ function template_bar_above()
 	if (empty($rates))
 		return;
 
-	$count = count($rates);
+	$count = is_array($rates) ? count($rates) : 0;
 
 	$header = '
 	<div class="topic_rating_div">';
@@ -99,7 +87,7 @@ function template_bar_above()
 					<span class="worst">0</span>
 					<span class="best">', $count, '</span>
 				</span>
-				<span class="votes">', count($context['rating_bar']['users']), '</span>
+				<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
 			</li>';
 
 		for ($ncount = 1; $ncount <= $context['rating_bar']['units']; $ncount++) {
@@ -109,7 +97,7 @@ function template_bar_above()
 				<span title="', $rates[$ncount-1], '" class="r', $ncount, '-unit rater">', $ncount, '</span>
 			</li>';
 		}
-		
+
 		$ncount = 0;
 
 		echo '
@@ -124,7 +112,7 @@ function template_bar_above()
 					<span class="worst">0</span>
 					<span class="best">', $count, '</span>
 				</span>
-				<span class="votes">', count($context['rating_bar']['users']), '</span>
+				<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
 			</li>
 		</ul>', $footer;
 	}
@@ -142,7 +130,7 @@ function template_bar_above()
 				\'<span class="rating">\' +
 					\'<span class="average">\' + rating + \'</span>\' +
 				\'</span>\' +
-				\'<span class="votes">', count($context['rating_bar']['users']), '</span>\' +
+				\'<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>\' +
 			\'</li></ul>\').blur();
 			});
 		});
@@ -156,7 +144,7 @@ function template_bar_below()
 function template_best_topics_above()
 {
 	global $txt, $settings, $scripturl, $context;
-	
+
 	echo '
 	<div id="best_topics">
 		<div class="cat_bar">
@@ -191,14 +179,14 @@ function template_best_topics_below()
 function template_callback_tr_ignored_boards()
 {
 	global $context;
-	
+
 	echo '
 		<dt></dt><dd></dd></dl>
 		<ul class="ignoreboards floatleft" style="margin-top: -30px">';
 
 	$i = 0;
 	$limit = ceil($context['num_boards'] / 2);
-	
+
 	foreach ($context['categories'] as $category) {
 		if ($i == $limit) {
 			echo '

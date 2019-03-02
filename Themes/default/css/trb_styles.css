@@ -36,7 +36,7 @@
 .unit-rating span.r2-unit:hover{width:50px}
 .unit-rating span.r3-unit{left:50px}
 .unit-rating span.r3-unit:hover{width:75px}
-.unit-rating span.r4-unit{left:75px}	
+.unit-rating span.r4-unit{left:75px}
 .unit-rating span.r4-unit:hover{width:100px}
 .unit-rating span.r5-unit{left:100px}
 .unit-rating span.r5-unit:hover{width:125px}
@@ -91,5 +91,21 @@
 	}
 	.unit-rating {
 		float: right;
+	}
+}
+@media (max-width: 720px) {
+	th:nth-child(2) {
+		display: none;
+	}
+	td:nth-child(2) {
+		display: none;
+	}
+}
+@media (max-width: 468px) {
+	th:nth-child(4) {
+		display: none;
+	}
+	td:nth-child(4) {
+		display: none;
 	}
 }
