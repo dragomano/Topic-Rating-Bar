@@ -28,7 +28,7 @@ $txt['tr_system_array']    = array('5 stars', '10 stars');
 $txt['tr_mini_rating']     = 'Display mini-rating on the message index';
 $txt['tr_show_best_topic'] = 'Display the best topic on the board index';
 $txt['tr_count_topics']    = 'Number of topics on <a href="%1$s?action=rating" target="_blank">the common stats page</a>';
-$txt['tr_ignore_boards']   = 'Ignored boards';
+$txt['tr_ignored_boards']  = 'Ignored boards';
 $txt['tr_regular_members'] = 'Regular Members';
 
 $txt['groups_rate_topics']         = 'Who can change topic ratings';

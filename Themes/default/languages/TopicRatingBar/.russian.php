@@ -28,7 +28,7 @@ $txt['tr_system_array']    = array('5 баллов', '10 баллов');
 $txt['tr_mini_rating']     = 'Отображать мини-рейтинг в списке тем';
 $txt['tr_show_best_topic'] = 'Отображать лучшую тему форума на главной странице';
 $txt['tr_count_topics']    = 'Максимальное количество тем на <a href="%1$s?action=rating" target="_blank">странице общей статистики</a>';
-$txt['tr_ignore_boards']   = 'Игнорируемые разделы';
+$txt['tr_ignored_boards']  = 'Игнорируемые разделы';
 $txt['tr_regular_members'] = 'Обычные пользователи';
 
 $txt['groups_rate_topics']         = 'Кто может оценивать темы';
