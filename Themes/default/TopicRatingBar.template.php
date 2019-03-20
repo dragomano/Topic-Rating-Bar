@@ -1,17 +1,5 @@
 <?php
 
-/**
- * TopicRating.template.php
- *
- * @package Topic Rating Bar
- * @link https://custom.simplemachines.org/mods/index.php?mod=3236
- * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2010-2018 Bugo
- * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
- *
- * @version 1.1.1
- */
-
 function template_rating()
 {
 	global $settings, $context, $txt;

@@ -9,8 +9,8 @@ if ((SMF == 'SSI') && !$user_info['is_admin'])
 	die('Admin privileges required.');
 
 $hooks = array(
-	'integrate_pre_include' => '$sourcedir/Class-TopicRating.php',
-	'integrate_pre_load'    => 'TopicRating::hooks'
+	'integrate_pre_include' => '$sourcedir/Class-TopicRatingBar.php',
+	'integrate_pre_load'    => 'TopicRatingBar::hooks'
 );
 
 if (!empty($context['uninstalling']))

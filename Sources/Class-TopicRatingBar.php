@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Class-TopicRating.php
+ * Class-TopicRatingBar.php
  *
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2010-2018 Bugo
+ * @copyright 2010-2019 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 1.1.1
+ * @version 1.2
  */
 
 if (!defined('SMF'))
@@ -17,23 +17,23 @@ if (!defined('SMF'))
 
 define('TRB_CDN', '//cdn.jsdelivr.net/jquery/3/jquery.min.js');
 
-class TopicRating
+class TopicRatingBar
 {
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'TopicRating::loadTheme', false);
-		add_integration_function('integrate_menu_buttons', 'TopicRating::ratingPreload', false);
-		add_integration_function('integrate_actions', 'TopicRating::actions', false);
-		add_integration_function('integrate_load_permissions', 'TopicRating::loadPermissions', false);
-		add_integration_function('integrate_admin_areas', 'TopicRating::adminAreas', false);
-		add_integration_function('integrate_modify_modifications', 'TopicRating::modifyModifications', false);
+		add_integration_function('integrate_load_theme', 'TopicRatingBar::loadTheme', false);
+		add_integration_function('integrate_menu_buttons', 'TopicRatingBar::ratingPreload', false);
+		add_integration_function('integrate_actions', 'TopicRatingBar::actions', false);
+		add_integration_function('integrate_load_permissions', 'TopicRatingBar::loadPermissions', false);
+		add_integration_function('integrate_admin_areas', 'TopicRatingBar::adminAreas', false);
+		add_integration_function('integrate_modify_modifications', 'TopicRatingBar::modifyModifications', false);
 	}
 
 	public static function loadTheme()
 	{
 		global $modSettings;
 
-		loadLanguage('TopicRating/');
+		loadLanguage('TopicRatingBar/');
 
 		if (!empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 2)
 			clean_cache();
@@ -44,10 +44,10 @@ class TopicRating
 		global $context, $modSettings, $smcFunc, $board_info, $settings;
 
 		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action']) && (defined('WIRELESS') && !WIRELESS) || $context['current_action'] == 'forum') {
-			self::ratingBestTopic();
+			self::getBestTopic();
 
 			if (!empty($context['best_topic']))	{
-				loadTemplate('TopicRating');
+				loadTemplate('TopicRatingBar');
 
 				if (isset($context['template_layers'][2]) && $context['template_layers'][2] == 'portal') {
 					$context['template_layers'][]  = 'portal';
@@ -110,20 +110,17 @@ class TopicRating
 		}
 	</style>';
 
-					self::ratingMessageIndex();
+					self::showRatingOnMessageIndex();
 				}
 
 				// Display bar
-				if (!empty($context['current_topic']) && empty($context['current_action']) && empty($board_info['error']) && empty(strpos($_SERVER['REQUEST_URI'], ';'))) {
-					loadTemplate(false, 'trb_styles');
-					$context['rating_bar'] = [];
-					self::ratingBar();
-				}
+				if (empty($context['current_action']) && empty($board_info['error']))
+					self::showRatingBar();
 			}
 		}
 	}
 
-	private static function ratingBestTopic()
+	private static function getBestTopic()
 	{
 		global $modSettings, $smcFunc, $context, $scripturl, $txt;
 
@@ -177,7 +174,7 @@ class TopicRating
 		$smcFunc['db_free_result']($query);
 	}
 
-	private static function ratingMessageIndex()
+	private static function showRatingOnMessageIndex()
 	{
 		global $forum_version, $context, $txt, $settings;
 
@@ -222,9 +219,12 @@ class TopicRating
 		}
 	}
 
-	private static function ratingBar($unit_width = 25)
+	private static function showRatingBar($unit_width = 25)
 	{
-		global $smcFunc, $context, $modSettings, $topicinfo;
+		global $context, $topicinfo, $smcFunc, $modSettings;
+
+		if (empty($context['current_topic']) || empty($topicinfo['id_member_started']))
+			return;
 
 		$query = $smcFunc['db_query']('', '
 			SELECT total_votes, total_value, user_ids
@@ -242,7 +242,7 @@ class TopicRating
 
 		$rating = ($count == 0) ? 0 : number_format($current_rating / $count, 0);
 		$rating_width = $rating * $unit_width;
-		$users = @unserialize($users);
+		$users = empty($users) ? [] : unserialize($users);
 		$voted = empty($users) ? false : in_array($context['user']['id'], $users);
 
 		$context['rating_bar'] = array(
@@ -259,14 +259,14 @@ class TopicRating
 
 		$context['proper_user'] = $topicinfo['id_member_started'] != $context['user']['id'] && allowedTo('rate_topics');
 
-		loadTemplate('TopicRating');
+		loadTemplate('TopicRatingBar', 'trb_styles');
 		$context['template_layers'][] = 'bar';
 	}
 
 	public static function actions(&$actionArray)
 	{
-		$actionArray['trb_rate'] = array('Class-TopicRating.php', array('TopicRating', 'ratingControl'));
-		$actionArray['rating']   = array('Class-TopicRating.php', array('TopicRating', 'ratingTop'));
+		$actionArray['trb_rate'] = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingControl'));
+		$actionArray['rating']   = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingTop'));
 	}
 
 	public static function ratingControl()
@@ -279,7 +279,7 @@ class TopicRating
 		$units       = empty($modSettings['tr_rate_system']) ? 5 : 10;
 
 		if (empty($vote_sent) || empty($topic) || empty($user_id_num))
-			exit();
+			exit;
 
 		$query = $smcFunc['db_query']('', '
 			SELECT total_votes, total_value, user_ids
@@ -331,14 +331,14 @@ class TopicRating
 			}
 		}
 
-		exit();
+		exit;
 	}
 
 	public static function ratingTop()
 	{
 		global $context, $txt, $scripturl, $modSettings, $smcFunc;
 
-		loadTemplate('TopicRating', 'trb_styles');
+		loadTemplate('TopicRatingBar', 'trb_styles');
 
 		$context['sub_template']  = 'rating';
 		$context['page_title']    = $txt['tr_top_stat'];
@@ -415,7 +415,7 @@ class TopicRating
 	{
 		global $txt, $context, $scripturl, $modSettings;
 
-		loadTemplate('TopicRating');
+		loadTemplate('TopicRatingBar');
 
 		$context['page_title'] = $txt['tr_title'];
 		$context['settings_title'] = $txt['settings'];
@@ -470,7 +470,7 @@ class TopicRating
 			redirectexit('action=admin;area=modsettings;sa=topic_rating');
 		}
 
-		   prepareDBSettingContext($config_vars);
+		prepareDBSettingContext($config_vars);
 	}
 
 	private static function ignoreBoards()

@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:TopicRatingBar</id>
 	<name>Topic Rating Bar</name>
-	<version>1.1.1</version>
+	<version>1.2</version>
 	<type>modification</type>
 
 	<install for="2.0 - 2.0.99">
@@ -21,9 +21,9 @@
 		<code>hooks.php</code>
 		<remove-file name="$themedir/css/trb_styles.css" />
 		<remove-file name="$themedir/scripts/jquery.tablesorter.min.js" />
-		<remove-file name="$themedir/TopicRating.template.php" />
-		<remove-file name="$sourcedir/Class-TopicRating.php" />
-		<remove-dir name="$languagedir/TopicRating" />
+		<remove-file name="$themedir/TopicRatingBar.template.php" />
+		<remove-file name="$sourcedir/Class-TopicRatingBar.php" />
+		<remove-dir name="$languagedir/TopicRatingBar" />
 		<remove-dir name="$themedir/images/trb" />
 		<redirect url="?action=admin;area=packages;sa=browse" timeout="1000" />
 	</uninstall>
