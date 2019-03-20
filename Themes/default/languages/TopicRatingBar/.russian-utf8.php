@@ -32,5 +32,5 @@ $txt['tr_ignore_boards']   = 'Игнорируемые разделы';
 $txt['tr_regular_members'] = 'Обычные пользователи';
 
 $txt['groups_rate_topics']         = 'Кто может оценивать темы';
-$txt['permissionname_rate_topics'] = 'Оценка тем';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Оценка тем';
 $txt['permissionhelp_rate_topics'] = 'Пользователи могут оценивать любые темы (кроме собственных) в разрешенных разделах.';

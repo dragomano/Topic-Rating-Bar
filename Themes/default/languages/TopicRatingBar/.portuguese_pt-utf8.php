@@ -21,7 +21,7 @@ $txt['tr_show_best_topic'] = 'Mostrar o melhor index no t&oacute;pico do quadro'
 $txt['tr_count_topics'] = 'N&uacute;mero de t&oacute;picos sobre <a href="%1$s?action=rating" target="_blank">a p&aacute;gina de estat&iacute;sticas comum</a>';
 $txt['groups_rate_topics'] = 'Quem pode mudar classifica&ccedil;&atilde;o t&oacute;pico';
 $txt['tr_regular_members'] = 'Membros Regulares';
-$txt['permissionname_rate_topics'] = 'Classifique dos t&oacute;picos';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Classifique dos t&oacute;picos';
 $txt['permissionhelp_rate_topics'] = 'Os utilizadores pode classificar todos os t&oacute;picos (n&atilde;o pr&oacute;prio) em quadros permitidas.';
 $txt['cannot_rate_topics'] = 'Desculpe, mas voc&ecirc; n&atilde;o tem permiss&atilde;o para avaliar t&oacute;picos.';
 

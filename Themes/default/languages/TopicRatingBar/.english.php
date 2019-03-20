@@ -32,5 +32,5 @@ $txt['tr_ignore_boards']   = 'Ignored boards';
 $txt['tr_regular_members'] = 'Regular Members';
 
 $txt['groups_rate_topics']         = 'Who can change topic ratings';
-$txt['permissionname_rate_topics'] = 'Rate of topics';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Rate of topics';
 $txt['permissionhelp_rate_topics'] = 'Users can rate any topics (not own) in allowed boards.';

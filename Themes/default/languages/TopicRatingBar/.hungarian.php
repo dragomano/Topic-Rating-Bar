@@ -21,7 +21,7 @@ $txt['tr_show_best_topic'] = 'Mutasd a legjobb témát a fõoldalon';
 $txt['tr_count_topics'] = 'Témák száma <a href="%1$s?action=rating" target="_blank">a közös statisztikai oldalon.</a>';
 $txt['groups_rate_topics'] = 'Ki változtathatja meg a témák értékelését';
 $txt['tr_regular_members'] = 'Szabályos tagok';
-$txt['permissionname_rate_topics'] = 'Téma értékelése';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Téma értékelése';
 $txt['permissionhelp_rate_topics'] = 'Felhasználók értékelhetik bármelyik témát (sajátot nem) az engedélyezett témáknál.';
 $txt['cannot_rate_topics'] = 'Sajnáljuk de nincsen engedélyed, hogy értékeld ezt a témát.';
 

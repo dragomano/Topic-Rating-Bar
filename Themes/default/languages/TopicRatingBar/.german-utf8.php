@@ -20,7 +20,7 @@ $txt['tr_mini_rating'] = 'Zeige Minibewertung im Boardindex';
 $txt['tr_count_topics'] = 'Anzahl der Themen in der Statistik';
 $txt['groups_rate_topics'] = 'Wer darf die Themen bewerten?';
 $txt['tr_regular_members'] = 'Mitglieder';
-$txt['permissionname_rate_topics'] = 'Themen bewerten';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Themen bewerten';
 $txt['permissionhelp_rate_topics'] = 'Mitglieder k&ouml;nnen alle Themen (au&szlig;er eigene) in ausgew&auml;hlten Boards bewerten.';
 $txt['cannot_rate_topics'] = 'Sorry, es ist Dir nicht erlaubt, Themen zu bewerten.';
 

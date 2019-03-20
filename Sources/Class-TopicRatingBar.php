@@ -408,7 +408,7 @@ class TopicRatingBar
 
 	public static function modifyModifications(&$subActions)
 	{
-		$subActions['topic_rating'] = array('TopicRating', 'settings');
+		$subActions['topic_rating'] = array('TopicRatingBar', 'settings');
 	}
 
 	public static function settings()
@@ -417,10 +417,10 @@ class TopicRatingBar
 
 		loadTemplate('TopicRatingBar');
 
-		$context['page_title'] = $txt['tr_title'];
-		$context['settings_title'] = $txt['settings'];
+		$context['page_title']           = $txt['tr_title'];
+		$context['settings_title']       = $txt['settings'];
 		$context['permissions_excluded'] = array(-1);
-		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
+		$context['post_url']             = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
 		$context[$context['admin_menu_name']]['tab_data']['tabs']['topic_rating'] = array('description' => $txt['tr_desc']);
 
 		if (!isset($modSettings['tr_count_topics']))

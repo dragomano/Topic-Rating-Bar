@@ -20,7 +20,7 @@ $txt['tr_mini_rating'] = 'Muestra un mini-rating en el indice de mensajes';
 $txt['tr_count_topics'] = 'Numero de mensajes en la p&aacute;gina de estad&iacute;siticas';
 $txt['groups_rate_topics'] = '&iquest;Quien puede puntuar?';
 $txt['tr_regular_members'] = 'Miembros Regulares';
-$txt['permissionname_rate_topics'] = 'Puntuaci&oacute;n de los mensajes';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Puntuaci&oacute;n de los mensajes';
 $txt['permissionhelp_rate_topics'] = 'Usuarios que pueden puntuar topics (menos los propios) en categorias permitidas.';
 $txt['cannot_rate_topics'] = 'Perdona, pero no tienes permisos para puntuar mensajes todavia.';
 

@@ -20,7 +20,7 @@ $txt['tr_mini_rating'] = 'Prikaži mini-ocenu u indeksu tema';
 $txt['tr_count_topics'] = 'Broj tema na zajedničkoj statističkoj stranici';
 $txt['groups_rate_topics'] = 'Ko može menjati ocene teme';
 $txt['tr_regular_members'] = 'Regularni Članovi';
-$txt['permissionname_rate_topics'] = 'Ocenjivanje tema';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Ocenjivanje tema';
 $txt['permissionhelp_rate_topics'] = 'Korisnici mogu ocenjivati bilo koje teme (ne sopstvene) u odobrenim forumima.';
 $txt['cannot_rate_topics'] = 'Žao nam je, ali nije vam dozvoljeno da ocenjujete teme.';
 
