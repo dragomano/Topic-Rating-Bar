@@ -178,7 +178,7 @@ class TopicRatingBar
 		if (empty($context['rating_bar']) || empty($context['subject']))
 			return;
 
-		$context['proper_user'] = $context['topicinfo']['id_member_started'] !== $context['user']['id'] && allowedTo('rate_topics');
+		$context['proper_user'] = $context['topicinfo']['id_member_started'] != $context['user']['id'] && allowedTo('rate_topics');
 
 		loadTemplate('TopicRatingBar', 'trb_styles');
 		$context['template_layers'][] = 'bar';
@@ -406,14 +406,15 @@ class TopicRatingBar
 
 		$context['best_topic'] = [];
 		while ($row = $smcFunc['db_fetch_assoc']($query)) {
-			$subject = shorten_subject($row['last'], 36);
+			$subject   = shorten_subject($row['subject'], 50);
+			$last_post = shorten_subject($row['last'], 36);
 
 			$context['best_topic'] = array(
-				'topic'     => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0" class="subject">' . $row['subject'] . '</a>',
+				'topic'     => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0" class="subject" title="' . $row['subject'] . '">' . $subject . '</a>',
 				'rating'    => number_format($row['total_value'] / $row['total_votes'], 2),
 				'replies'   => $row['num_replies'] + 1,
 				'time'      => $row['poster_time'] > 0 ? timeformat($row['poster_time']) : $txt['not_applicable'],
-				'last_post' => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.msg' . $row['id_last_msg'] . '#new" title="' . $row['last'] . '">' . $subject . '</a>',
+				'last_post' => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.msg' . $row['id_last_msg'] . '#new" title="' . $row['last'] . '">' . $last_post . '</a>',
 				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '" target="_blank">' . $row['real_name'] . '</a>',
 				'votes'     => $row['total_votes']
 			);
