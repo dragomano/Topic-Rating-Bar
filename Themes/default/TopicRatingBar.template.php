@@ -130,8 +130,9 @@ function template_bar_above()
 	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript">
 		var work = "', $scripturl, '?action=trb_rate";
-		jQuery(document).ready(function($){
-			$("#unit_ul', $context['current_topic'], ' li > span").on("click", function(){
+		jQuery(document).ready(function($) {
+			$("#unit_ul', $context['current_topic'], ' li > span").on("click", function() {
+				ajax_indicator(true);
 				var rating = $(this).text();
 				$.post(work, {stars: rating, topic: ', $context['current_topic'], ', user: ', $context['user']['id'], '});
 				$("#unit_ul', $context['current_topic'], '").replaceWith(\'<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">\' +
@@ -142,6 +143,9 @@ function template_bar_above()
 				\'</span>\' +
 				\'<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>\' +
 			\'</li></ul>\').blur();
+				setTimeout(function() {
+					ajax_indicator(false);
+				}, 500);
 			});
 		});
 	</script>';
