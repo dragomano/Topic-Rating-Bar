@@ -3,7 +3,7 @@
 * **License:** [Artistic License 2.0](https://opensource.org/licenses/artistic-license-2.0)
 * **Compatible with:** SMF 2.0
 * **Hooks only:** Yes
-* **Languages:** English, Russian
+* **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese-Pt, Serbian, Spanish
 
 ## Description
 Simple rating bar for topics.
