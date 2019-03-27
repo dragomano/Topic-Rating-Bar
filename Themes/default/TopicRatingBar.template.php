@@ -18,7 +18,7 @@ function template_rating()
 	<div class="tborder topic_table centertext">
 		<table class="table_grid">
 			<thead>
-				<tr class="catbg">
+				<tr class="title_bar">
 					<th>', $txt['topic'], '</th>
 					<th>', $txt['board'], '</th>
 					<th>', $txt['author'], '</th>
@@ -62,7 +62,7 @@ function template_rating()
 
 function template_bar_above()
 {
-	global $context, $modSettings, $txt, $scripturl, $settings;
+	global $modSettings, $txt, $scripturl, $settings, $context;
 
 	$rates = explode("|", empty($modSettings['tr_rate_system']) ? $txt['tr_rates'] : $txt['tr_rates_10']);
 
@@ -72,7 +72,10 @@ function template_bar_above()
 	$count = is_array($rates) ? count($rates) : 0;
 
 	$header = '
-	<div class="topic_rating_div">';
+	<div class="roundframe topic_rating_div">
+		<a href="' . $scripturl . '?action=rating" target="_blank">
+			<img class="icon" alt="" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png">
+		</a>';
 
 	$footer = '
 	</div>';
@@ -157,7 +160,7 @@ function template_best_topics_above()
 		<div>
 			<div class="up_contain">
 				<div class="board_icon">
-					<img alt="" src="', $settings['default_images_url'], '/trb/best_topic.png">
+					<img alt="*" src="', $settings['default_images_url'], '/trb/best_topic.png">
 				</div>
 				<div class="info">
 					<p class="floatleft board_description">', $context['best_topic']['topic'], '<br>

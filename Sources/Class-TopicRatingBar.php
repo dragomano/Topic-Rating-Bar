@@ -9,7 +9,7 @@
  * @copyright 2010-2019 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 1.2
+ * @version 1.3
  */
 
 if (!defined('SMF'))
@@ -68,7 +68,7 @@ class TopicRatingBar
 		if (isset($context['current_board']) && in_array($context['current_board'], $context['trb_ignored_boards']))
 			return;
 
-		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action']) || $context['current_action'] == 'forum') {
+		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action'])) {
 			self::getBestTopic();
 
 			if (!empty($context['best_topic']))	{
@@ -129,7 +129,7 @@ class TopicRatingBar
 			}
 
 			// Display bar
-			if (empty($context['current_action']) && empty($board_info['error']))
+			if (empty($board_info['error']))
 				self::showRatingBar();
 		}
 	}

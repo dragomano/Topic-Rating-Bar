@@ -5,7 +5,8 @@
 	height: 25px;
 	position: relative;
 	background: url(../images/trb/all_stars.png) top left repeat-x;
-	margin-left: 3em;
+	width: 250px;
+	margin: 0 auto;
 }
 .unit-rating li {
 	text-indent: -90000px;
@@ -61,38 +62,14 @@
 .catbg th {cursor: pointer}
 .headerSortUp {color: blue !important}
 .headerSortDown {color: red !important}
-.title_barIC img.icon {
-    float: left;
-    margin: 5px 8px 0 0;
-	width: 20px;
-}
-.title_barIC .title {
-	float: right;
-	font-size: 0.9em;
-	font-weight: bold;
-	line-height: 31px;
-}
 .topic_rating_div {
-	position: absolute;
-	right: 50%;
-	margin-top: 50px;
+	margin: 0 auto 1em;
+	height: 50px;
 }
-@media screen and (max-width: 360px) {
-	.topic_rating_div {
-		display: none;
-	}
-	.title_barIC .title {
-		display: none;
-	}
+.topic_rating_div a {
+	float: left;
 }
-@media screen and (max-width: 1024px) {
-	.topic_rating_div {
-		right: 6%;
-	}
-	.unit-rating {
-		float: right;
-	}
-}
+
 @media (max-width: 720px) {
 	th:nth-child(2) {
 		display: none;
