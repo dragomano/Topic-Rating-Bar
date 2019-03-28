@@ -49,7 +49,7 @@ function template_rating()
 	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript"><!-- // --><![CDATA[
-		jQuery(document).ready(function($){
+		jQuery(document).ready(function($) {
 			$(".table_grid").tablesorter();
 		});
 	// ]]></script>';

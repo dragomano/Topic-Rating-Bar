@@ -9,7 +9,7 @@
  * @copyright 2010-2019 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 1.2
+ * @version 1.3
  */
 
 if (!defined('SMF'))
@@ -43,7 +43,7 @@ class TopicRatingBar
 	{
 		global $context, $modSettings, $smcFunc, $board_info, $settings;
 
-		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action']) && (defined('WIRELESS') && !WIRELESS) || $context['current_action'] == 'forum') {
+		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action']) && (defined('WIRELESS') && !WIRELESS)) {
 			self::getBestTopic();
 
 			if (!empty($context['best_topic']))	{
@@ -114,13 +114,13 @@ class TopicRatingBar
 				}
 
 				// Display bar
-				if (empty($context['current_action']) && empty($board_info['error']))
+				if (empty($board_info['error']))
 					self::showRatingBar();
 			}
 		}
 	}
 
-	private static function getBestTopic()
+	public static function getBestTopic()
 	{
 		global $modSettings, $smcFunc, $context, $scripturl, $txt;
 
@@ -176,47 +176,41 @@ class TopicRatingBar
 
 	private static function showRatingOnMessageIndex()
 	{
-		global $forum_version, $context, $txt, $settings;
-
-		$version = substr($forum_version, 6, 1);
+		global $context, $txt, $settings;
 
 		if (!empty($context['topic_rating'])) {
-			if (empty($version)) {
-				$cdn = '//cdn.jsdelivr.net/g/jquery@3,jquery.migrate@1';
-
-				$context['insert_after_template'] .= '
-	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="' . $cdn . '"%3E%3C/script%3E\'))</script>
+			$context['insert_after_template'] .= '
+	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="//cdn.jsdelivr.net/g/jquery@3,jquery.migrate@1"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		$star = jQuery.noConflict();
 		$star(document).ready(function($){';
-			} else {
-				$context['insert_after_template'] .= '
+		} else {
+			$context['insert_after_template'] .= '
 	<script type="text/javascript"><!-- // --><![CDATA[
-		jQuery(document).ready(function($){';
-			}
+		jQuery(document).ready(function($) {';
+		}
 
-			foreach ($context['topic_rating'] as $topic => $data) {
-				$rating = ($data['votes'] == 0) ? 0 : number_format($data['value'] / $data['votes'], 0);
+		foreach ($context['topic_rating'] as $topic => $data) {
+			$rating = ($data['votes'] == 0) ? 0 : number_format($data['value'] / $data['votes'], 0);
 
-				$img = '';
-				for ($i = 0; $i < $rating; $i++)
-					$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
+			$img = '';
+			for ($i = 0; $i < $rating; $i++)
+				$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
 
-				if (empty($version))
-					$context['insert_after_template'] .= '
+			if (empty($version))
+				$context['insert_after_template'] .= '
 			var starImg' . $topic . ' = $star("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
-				else
-					$context['insert_after_template'] .= '
+			else
+				$context['insert_after_template'] .= '
 			var starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
 
-				$context['insert_after_template'] .= '
-			starImg' . $topic . '.before(\'<span class="topic_stars_main" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['votes'] . '">' . $img . '</span>\');';
-			}
-
 			$context['insert_after_template'] .= '
+			starImg' . $topic . '.before(\'<span class="topic_stars_main" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['votes'] . '">' . $img . '</span>\');';
+		}
+
+		$context['insert_after_template'] .= '
 		});
 	// ]]></script>';
-		}
 	}
 
 	private static function showRatingBar($unit_width = 25)
