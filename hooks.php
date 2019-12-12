@@ -15,7 +15,6 @@ $hooks = array(
 
 if (!empty($context['uninstalling']))
 	$call = 'remove_integration_function';
-
 else
 	$call = 'add_integration_function';
 
