@@ -9,7 +9,7 @@
  * @copyright 2010-2019 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 1.3
+ * @version 1.4
  */
 
 if (!defined('SMF'))
@@ -24,13 +24,14 @@ class TopicRatingBar
 	 */
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'TopicRatingBar::loadTheme', false);
-		add_integration_function('integrate_menu_buttons', 'TopicRatingBar::menuButtons', false);
-		add_integration_function('integrate_actions', 'TopicRatingBar::actions', false);
-		add_integration_function('integrate_load_permissions', 'TopicRatingBar::loadPermissions', false);
-		add_integration_function('integrate_admin_areas', 'TopicRatingBar::adminAreas', false);
-		add_integration_function('integrate_admin_search', 'TopicRatingBar::adminSearch', false);
-		add_integration_function('integrate_modify_modifications', 'TopicRatingBar::modifyModifications', false);
+		add_integration_function('integrate_load_theme', 'TopicRatingBar::loadTheme', false, __FILE__);
+		add_integration_function('integrate_menu_buttons', 'TopicRatingBar::menuButtons', false, __FILE__);
+		add_integration_function('integrate_actions', 'TopicRatingBar::actions', false, __FILE__);
+		add_integration_function('integrate_load_illegal_guest_permissions', 'TopicRatingBar::loadIllegalGuestPermissions', false, __FILE__);
+		add_integration_function('integrate_load_permissions', 'TopicRatingBar::loadPermissions', false, __FILE__);
+		add_integration_function('integrate_admin_areas', 'TopicRatingBar::adminAreas', false, __FILE__);
+		add_integration_function('integrate_admin_search', 'TopicRatingBar::adminSearch', false, __FILE__);
+		add_integration_function('integrate_modify_modifications', 'TopicRatingBar::modifyModifications', false, __FILE__);
 	}
 
 	/**
@@ -48,9 +49,6 @@ class TopicRatingBar
 
 		if (!empty($modSettings['tr_ignored_boards']))
 			$context['trb_ignored_boards'] = explode(",", $modSettings['tr_ignored_boards']);
-
-		if (!empty($modSettings['recycle_board']))
-			$context['trb_ignored_boards'][] = $modSettings['recycle_board'];
 
 		if (!empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 2)
 			clean_cache();
@@ -208,7 +206,7 @@ class TopicRatingBar
 				$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
 
 		$context['insert_after_template'] .= '
-			var starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
+			let starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
 
 		$context['insert_after_template'] .= '
 			starImg' . $topic . '.before(\'<span class="topic_stars_main" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['votes'] . '">' . $img . '</span>\');';
@@ -333,7 +331,7 @@ class TopicRatingBar
 			WHERE m.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
-				AND {query_see_board}
+				AND {query_wanna_see_message_board}
 			ORDER BY tr.total_votes DESC, tr.total_value DESC
 			LIMIT ' . $limit,
 			array(
@@ -356,6 +354,18 @@ class TopicRatingBar
 	}
 
 	/**
+	 * Прячем право на оценку тем для гостей
+	 *
+	 * @return void
+	 */
+	public static function loadIllegalGuestPermissions()
+	{
+		global $context;
+
+		$context['non_guest_permissions'][] = 'rate_topics';
+	}
+
+	/**
 	 * Добавляем разрешение на оценивание тем
 	 *
 	 * @param array $permissionGroups
@@ -364,9 +374,6 @@ class TopicRatingBar
 	 */
 	public static function loadPermissions(&$permissionGroups, &$permissionList)
 	{
-		global $context;
-
-		$context['non_guest_permissions'][] = 'rate_topics';
 		$permissionList['membergroup']['rate_topics'] = array(false, 'general', 'view_basic_info');
 	}
 
@@ -395,7 +402,7 @@ class TopicRatingBar
 			WHERE m.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
-				AND {query_see_board}
+				AND {query_wanna_see_message_board}
 				AND t.locked = 0
 			ORDER BY tr.total_value DESC
 			LIMIT 1',
@@ -470,12 +477,13 @@ class TopicRatingBar
 	{
 		global $context, $txt, $scripturl, $modSettings;
 
-		loadTemplate('TopicRatingBar');
+		$context['page_title']     = $txt['tr_title'];
+		$context['settings_title'] = $txt['settings'];
 
-		$context['page_title']           = $txt['tr_title'];
-		$context['settings_title']       = $txt['settings'];
-		$context['permissions_excluded'] = array(-1); // Прячем выбор разрешений на оценку тем гостями
-		$context['post_url']             = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
+		// Прячем выбор разрешений на оценку тем гостями
+		$context['permissions_excluded']['rate_topics'] = array(-1);
+
+		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
 		$context[$context['admin_menu_name']]['tab_data']['tabs']['topic_rating'] = array('description' => $txt['tr_desc']);
 
 		if (!isset($modSettings['tr_count_topics']))

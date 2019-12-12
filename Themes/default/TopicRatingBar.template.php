@@ -57,7 +57,7 @@ function template_rating()
 
 	echo '
 	<br class="clear">
-	<div class="smalltext centertext"><a href="https://dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
+	<div class="smalltext centertext"><a href="https://dragomano.ru/mods/topic-rating-bar" target="_blank" rel="noopener">Topic Rating Bar</a></div>';
 }
 
 function template_bar_above()
@@ -122,11 +122,11 @@ function template_bar_above()
 
 	echo '
 	<script>
-		var work = "', $scripturl, '?action=trb_rate";
+		let work = smf_scripturl + "?action=trb_rate";
 		jQuery(document).ready(function($) {
 			$("#unit_ul', $context['current_topic'], ' li > span").on("click", function() {
 				ajax_indicator(true);
-				var rating = $(this).text();
+				let rating = $(this).text();
 				$.post(work, {stars: rating, topic: ', $context['current_topic'], ', user: ', $context['user']['id'], '});
 				$("#unit_ul', $context['current_topic'], '").replaceWith(\'<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">\' +
 			\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ', $context['rating_bar']['unit_width'], ') + \'px;">\' +
