@@ -1,28 +1,28 @@
 <?php
 
-$txt['tr_title'] = 'Téma értékelése';
-$txt['tr_rating'] = 'Téma értékelése:';
-$txt['tr_top_stat'] = 'A közös népszerûségi statisztika';
-$txt['tr_top_topics'] = 'A legnépszerûbb téma';
-$txt['tr_top_desc'] = 'Itt láthatod a legnépszerûbb témát (értékelés és szavazatok száma alapján). Lehetõséged van rendezni a táblázatot bármely oszlop alapján.';
-$txt['tr_best_topic'] = 'A legjobb téma';
-$txt['tr_other_topics'] = 'A többi népszerû téma';
-$txt['tr_top_empty'] = 'Nincsen még értékelés.';
-$txt['tr_rate_pl'] = 'Értékeld ezt a témát: ';
+$txt['tr_title'] = 'TÃ©ma Ã©rtÃ©kelÃ©se';
+$txt['tr_rating'] = 'TÃ©ma Ã©rtÃ©kelÃ©se:';
+$txt['tr_top_stat'] = 'A kÃ¶zÃ¶s nÃ©pszerÃ»sÃ©gi statisztika';
+$txt['tr_top_topics'] = 'A legnÃ©pszerÃ»bb tÃ©ma';
+$txt['tr_top_desc'] = 'Itt lÃ¡thatod a legnÃ©pszerÃ»bb tÃ©mÃ¡t (Ã©rtÃ©kelÃ©s Ã©s szavazatok szÃ¡ma alapjÃ¡n). LehetÃµsÃ©ged van rendezni a tÃ¡blÃ¡zatot bÃ¡rmely oszlop alapjÃ¡n.';
+$txt['tr_best_topic'] = 'A legjobb tÃ©ma';
+$txt['tr_other_topics'] = 'A tÃ¶bbi nÃ©pszerÃ» tÃ©ma';
+$txt['tr_top_empty'] = 'Nincsen mÃ©g Ã©rtÃ©kelÃ©s.';
+$txt['tr_rate_pl'] = 'Ã‰rtÃ©keld ezt a tÃ©mÃ¡t: ';
 $txt['tr_currently'] = 'Jelenleg: ';
-$txt['tr_average'] = 'Átlagos értékelés';
-$txt['tr_rates'] = 'Nagyon gyeneg|Gyenge|Elfogadható|Jó|Kiváló';
-$txt['tr_error'] = 'Nem értékelheted a saját témád!';
-$txt['tr_votes'] = 'Összes szavazat: ';
-$txt['tr_desc'] = 'Ez a módosítás segít értékelési rendszert készíteni a fórum témáidhoz.';
-$txt['tr_ignore_boards'] = 'Ezeknek a témáknak az értékelésének a kikapcsolása';
-$txt['tr_mini_rating'] = 'Mini értékelés kikapcsolása az üzenet ablakban';
-$txt['tr_show_best_topic'] = 'Mutasd a legjobb témát a fõoldalon';
-$txt['tr_count_topics'] = 'Témák száma <a href="%1$s?action=rating" target="_blank">a közös statisztikai oldalon.</a>';
-$txt['groups_rate_topics'] = 'Ki változtathatja meg a témák értékelését';
-$txt['tr_regular_members'] = 'Szabályos tagok';
-$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'Téma értékelése';
-$txt['permissionhelp_rate_topics'] = 'Felhasználók értékelhetik bármelyik témát (sajátot nem) az engedélyezett témáknál.';
-$txt['cannot_rate_topics'] = 'Sajnáljuk de nincsen engedélyed, hogy értékeld ezt a témát.';
+$txt['tr_average'] = 'Ãtlagos Ã©rtÃ©kelÃ©s';
+$txt['tr_rates'] = 'Nagyon gyeneg|Gyenge|ElfogadhatÃ³|JÃ³|KivÃ¡lÃ³';
+$txt['tr_error'] = 'Nem Ã©rtÃ©kelheted a sajÃ¡t tÃ©mÃ¡d!';
+$txt['tr_votes'] = 'Ã–sszes szavazat: ';
+$txt['tr_desc'] = 'Ez a mÃ³dosÃ­tÃ¡s segÃ­t Ã©rtÃ©kelÃ©si rendszert kÃ©szÃ­teni a fÃ³rum tÃ©mÃ¡idhoz.';
+$txt['tr_ignore_boards'] = 'Ezeknek a tÃ©mÃ¡knak az Ã©rtÃ©kelÃ©sÃ©nek a kikapcsolÃ¡sa';
+$txt['tr_mini_rating'] = 'Mini Ã©rtÃ©kelÃ©s kikapcsolÃ¡sa az Ã¼zenet ablakban';
+$txt['tr_show_best_topic'] = 'Mutasd a legjobb tÃ©mÃ¡t a fÃµoldalon';
+$txt['tr_count_topics'] = 'TÃ©mÃ¡k szÃ¡ma <a href="%1$s?action=rating" target="_blank">a kÃ¶zÃ¶s statisztikai oldalon.</a>';
+$txt['groups_rate_topics'] = 'Ki vÃ¡ltoztathatja meg a tÃ©mÃ¡k Ã©rtÃ©kelÃ©sÃ©t';
+$txt['tr_regular_members'] = 'SzabÃ¡lyos tagok';
+$txt['permissionname_rate_topics'] = $txt['group_perms_name_rate_topics'] = 'TÃ©ma Ã©rtÃ©kelÃ©se';
+$txt['permissionhelp_rate_topics'] = 'FelhasznÃ¡lÃ³k Ã©rtÃ©kelhetik bÃ¡rmelyik tÃ©mÃ¡t (sajÃ¡tot nem) az engedÃ©lyezett tÃ©mÃ¡knÃ¡l.';
+$txt['cannot_rate_topics'] = 'SajnÃ¡ljuk de nincsen engedÃ©lyed, hogy Ã©rtÃ©keld ezt a tÃ©mÃ¡t.';
 
 ?>

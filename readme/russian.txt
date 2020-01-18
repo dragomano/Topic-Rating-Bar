@@ -1,5 +1,5 @@
 [center][color=red][size=16pt][b]Topic Rating Bar[/b][/size][/color]
 [color=blue][b][size=10pt]By Bugo[/size][/b][/color]
 
-[color=green]Простенькая модификация для оценки тем.[/color]
-Звёздочки и оформление позаимствованы из мода [url=http://vbsupport.org/forum/showthread.php?t=30193]AJAX Threads Rating[/url] (для vBulletin).[/center][hr]Распространяется по лицензии [url=https://opensource.org/licenses/artistic-license-2.0]Artistic License 2.0[/url]
+[color=green]РџСЂРѕСЃС‚РµРЅСЊРєР°СЏ РјРѕРґРёС„РёРєР°С†РёСЏ РґР»СЏ РѕС†РµРЅРєРё С‚РµРј.[/color]
+Р—РІС‘Р·РґРѕС‡РєРё Рё РѕС„РѕСЂРјР»РµРЅРёРµ РїРѕР·Р°РёРјСЃС‚РІРѕРІР°РЅС‹ РёР· РјРѕРґР° [url=http://vbsupport.org/forum/showthread.php?t=30193]AJAX Threads Rating[/url] (РґР»СЏ vBulletin).[/center][hr]Р Р°СЃРїСЂРѕСЃС‚СЂР°РЅСЏРµС‚СЃСЏ РїРѕ Р»РёС†РµРЅР·РёРё [url=https://opensource.org/licenses/artistic-license-2.0]Artistic License 2.0[/url]
