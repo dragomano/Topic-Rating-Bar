@@ -1,7 +1,7 @@
 # Topic Rating Bar
-* **Author:** Bugo [dragomano.ru](https://dragomano.ru)
+* **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/topic-rating-bar)
 * **License:** [Artistic License 2.0](https://opensource.org/licenses/artistic-license-2.0)
-* **Compatible with:** SMF 2.1 RC1
+* **Compatible with:** SMF 2.1.*
 * **Hooks only:** Yes
 * **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish
 

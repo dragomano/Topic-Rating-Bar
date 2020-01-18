@@ -6,10 +6,10 @@
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2010-2019 Bugo
+ * @copyright 2010-2020 Bugo
  * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
  *
- * @version 1.4
+ * @version 1.5
  */
 
 if (!defined('SMF'))
@@ -61,9 +61,9 @@ class TopicRatingBar
 	 */
 	public static function menuButtons()
 	{
-		global $context, $modSettings, $smcFunc, $settings, $board_info;
+		global $context, $modSettings, $smcFunc, $board_info;
 
-		if (isset($context['current_board']) && in_array($context['current_board'], $context['trb_ignored_boards']))
+		if (!empty($context['current_board']) && !empty($context['trb_ignored_boards']) && in_array($context['current_board'], $context['trb_ignored_boards']))
 			return;
 
 		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action'])) {
@@ -112,16 +112,7 @@ class TopicRatingBar
 				}
 
 				if (!empty($context['topic_rating']))
-					addInlineCss('
-		.topic_stars_main {
-			float: right;
-			margin-right: 50px;
-			margin-top: 10px;
-		}
-		.topic_stars {
-			background-image: url(' . $settings['default_images_url'] . '/trb/one_star.png);
-			background-repeat: no-repeat;
-		}');
+					loadCssFile('trb_styles.css');
 
 				self::showRatingOnMessageIndex();
 			}
@@ -140,7 +131,7 @@ class TopicRatingBar
 	 */
 	private static function showRatingBar($unit_width = 25)
 	{
-		global $smcFunc, $context, $modSettings, $topicinfo;
+		global $smcFunc, $context, $modSettings;
 
 		if (empty($context['current_topic']) || empty($context['topicinfo']['id_member_started']))
 			return;
@@ -321,13 +312,13 @@ class TopicRatingBar
 		$limit = !empty($modSettings['tr_count_topics']) ? (int) $modSettings['tr_count_topics'] : 0;
 
 		$query = $smcFunc['db_query']('', '
-			SELECT tr.id, tr.total_votes, tr.total_value, ms.subject, b.id_board, b.name, m.id_member, m.id_group, m.real_name, mg.group_name
+			SELECT tr.id, tr.total_votes, tr.total_value, m.subject, b.id_board, b.name, mem.id_member, mem.id_group, mem.real_name, mg.group_name
 			FROM {db_prefix}topic_ratings AS tr
 				LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = tr.id)
-				LEFT JOIN {db_prefix}messages AS ms ON (ms.id_msg = t.id_first_msg)
-				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = ms.id_board)
-				LEFT JOIN {db_prefix}members AS m ON (m.id_member = t.id_member_started)
-				LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = m.id_group)
+				LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = t.id_first_msg)
+				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board)
+				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = t.id_member_started)
+				LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = mem.id_group)
 			WHERE m.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
@@ -342,9 +333,9 @@ class TopicRatingBar
 		$context['top_rating'] = [];
 		while ($row = $smcFunc['db_fetch_assoc']($query))
 			$context['top_rating'][$row['id']] = array(
-				'topic'  => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0" target="_blank">' . $row['subject'] . '</a>',
-				'board'  => '<a href="' . $scripturl . '?board=' . $row['id_board'] . '.0" target="_blank">' . $row['name'] . '</a>',
-				'author' => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '" target="_blank">' . $row['real_name'] . '</a>',
+				'topic'  => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0">' . $row['subject'] . '</a>',
+				'board'  => '<a href="' . $scripturl . '?board=' . $row['id_board'] . '.0">' . $row['name'] . '</a>',
+				'author' => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
 				'group'  => empty($row['id_group']) ? $txt['tr_regular_members'] : $row['group_name'],
 				'rating' => number_format($row['total_value'] / $row['total_votes'], 2),
 				'votes'  => $row['total_votes']
@@ -391,18 +382,17 @@ class TopicRatingBar
 
 		$query = $smcFunc['db_query']('', '
 			SELECT
-				tr.id, tr.total_votes, tr.total_value, t.id_last_msg, t.num_replies, ms.subject, ms2.id_member,
-				ms2.poster_time, ms2.subject AS last, IFNULL(m.real_name, 0) AS real_name
+				tr.id, tr.total_votes, tr.total_value, t.id_last_msg, t.num_replies, mf.subject, ml.id_member,
+				ml.poster_time, ml.subject AS last, COALESCE(mem.real_name, 0) AS real_name
 			FROM {db_prefix}topic_ratings AS tr
 				LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = tr.id)
-				LEFT JOIN {db_prefix}messages AS ms ON (ms.id_msg = t.id_first_msg)
-				LEFT JOIN {db_prefix}messages AS ms2 ON (ms2.id_msg = t.id_last_msg)
-				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = ms.id_board)
-				LEFT JOIN {db_prefix}members AS m ON (m.id_member = ms2.id_member)
-			WHERE m.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
+				LEFT JOIN {db_prefix}messages AS mf ON (mf.id_msg = t.id_first_msg)
+				LEFT JOIN {db_prefix}messages AS ml ON (ml.id_msg = t.id_last_msg)
+				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = mf.id_board)
+				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = ml.id_member)
+			WHERE t.id_member_started != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
-				AND {query_wanna_see_message_board}
 				AND t.locked = 0
 			ORDER BY tr.total_value DESC
 			LIMIT 1',
@@ -422,7 +412,7 @@ class TopicRatingBar
 				'replies'   => $row['num_replies'] + 1,
 				'time'      => $row['poster_time'] > 0 ? timeformat($row['poster_time']) : $txt['not_applicable'],
 				'last_post' => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.msg' . $row['id_last_msg'] . '#new" title="' . $row['last'] . '">' . $last_post . '</a>',
-				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '" target="_blank">' . $row['real_name'] . '</a>',
+				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
 				'votes'     => $row['total_votes']
 			);
 		}
@@ -453,7 +443,7 @@ class TopicRatingBar
 	 */
 	public static function adminSearch(&$language_files, &$include_files, &$settings_search)
 	{
-		$settings_search[] = array('TopicRatingBar::settings', 'area=modsettings;sa=topic_rating');
+		$settings_search[] = array(array('TopicRatingBar', 'settings'), 'area=modsettings;sa=topic_rating');
 	}
 
 	/**
@@ -471,7 +461,8 @@ class TopicRatingBar
 	 * Настройки мода
 	 *
 	 * @param boolean $return_config
-	 * @return void
+	 *
+     * @return array
 	 */
 	public static function settings($return_config = false)
 	{
@@ -479,9 +470,6 @@ class TopicRatingBar
 
 		$context['page_title']     = $txt['tr_title'];
 		$context['settings_title'] = $txt['settings'];
-
-		// Прячем выбор разрешений на оценку тем гостями
-		$context['permissions_excluded']['rate_topics'] = array(-1);
 
 		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
 		$context[$context['admin_menu_name']]['tab_data']['tabs']['topic_rating'] = array('description' => $txt['tr_desc']);

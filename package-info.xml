@@ -3,12 +3,12 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:TopicRatingBar</id>
 	<name>Topic Rating Bar</name>
-	<version>1.4.1</version>
+	<version>1.5</version>
 	<type>modification</type>
 
-	<install for="2.1 RC3, 2.1 - 2.1.99">
-		<readme parsebbc="true" lang="russian" type="file">russian.txt</readme>
-		<readme parsebbc="true" type="file">english.txt</readme>
+	<install for="2.1.*">
+		<readme parsebbc="true" lang="russian" type="file">readme/russian.txt</readme>
+		<readme parsebbc="true" lang="english" type="file">readme/english.txt</readme>
 		<hook hook="integrate_pre_load" function="TopicRatingBar::hooks" file="$sourcedir/Class-TopicRatingBar.php" />
 		<require-dir name="Themes" destination="$boarddir" />
 		<require-dir name="Sources" destination="$boarddir" />
@@ -16,7 +16,7 @@
 		<redirect url="?action=admin;area=modsettings;sa=topic_rating" timeout="1000" />
 	</install>
 
-	<uninstall for="2.1 RC3, 2.1 - 2.1.99">
+	<uninstall for="2.1.*">
 		<hook hook="integrate_pre_load" function="TopicRatingBar::hooks" file="$sourcedir/Class-TopicRatingBar.php" reverse="true" />
 		<remove-file name="$themedir/css/trb_styles.css" />
 		<remove-file name="$themedir/scripts/jquery.tablesorter.min.js" />

@@ -73,7 +73,7 @@ function template_bar_above()
 
 	$header = '
 	<div class="roundframe topic_rating_div">
-		<a href="' . $scripturl . '?action=rating" target="_blank">
+		<a href="' . $scripturl . '?action=rating">
 			<img class="icon" alt="" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png">
 		</a>';
 
@@ -93,15 +93,13 @@ function template_bar_above()
 				<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
 			</li>';
 
-		for ($ncount = 1; $ncount <= $context['rating_bar']['units']; $ncount++) {
+		for ($i = 1; $i <= $context['rating_bar']['units']; $i++) {
 			if (empty($context['rating_bar']['voted']))
 				echo '
 			<li>
-				<span title="', $rates[$ncount-1], '" class="r', $ncount, '-unit rater">', $ncount, '</span>
+				<span title="', $rates[$i-1], '" class="r', $i, '-unit rater">', $i, '</span>
 			</li>';
 		}
-
-		$ncount = 0;
 
 		echo '
 		</ul>', $footer;
