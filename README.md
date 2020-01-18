@@ -13,4 +13,4 @@ Themes created by guests cannot be rated.
 Модификация для создания рейтинговой системы тем (5/10 звёздочек).
 Темы, созданные гостями, оценке не подлежат.
 
-![Пример рейтинга](example.png)
+![Пример рейтинга](https://user-images.githubusercontent.com/229402/72662059-d28d2600-3a03-11ea-916b-ca64820fc9a0.png)
