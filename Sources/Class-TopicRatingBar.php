@@ -6,8 +6,8 @@
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2010-2019 Bugo
- * @license https://opensource.org/licenses/artistic-license-2.0 Artistic License
+ * @copyright 2011-2020 Bugo
+ * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
  * @version 1.3
  */

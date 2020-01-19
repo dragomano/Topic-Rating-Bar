@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $txt['tr_title'] = 'Topic Rating Bar';
 $txt['tr_rating'] = 'Ocjenjivanje teme:';
