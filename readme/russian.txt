@@ -2,4 +2,4 @@
 [color=blue][b][size=10pt]By Bugo[/size][/b][/color]
 
 [color=green]Простенькая модификация для оценки тем.[/color]
-Звёздочки и оформление позаимствованы из мода [url=http://vbsupport.org/forum/showthread.php?t=30193]AJAX Threads Rating[/url] (для vBulletin).[/center][hr]Распространяется по лицензии [url=https://opensource.org/licenses/artistic-license-2.0]Artistic License 2.0[/url]
+Звёздочки и оформление позаимствованы из мода [url=https://vbsupport.org/forum/showthread.php?t=30193]AJAX Threads Rating[/url] (для vBulletin).[/center][hr]Распространяется по лицензии [url=https://github.com/dragomano/Topic-Rating-Bar/blob/master/LICENSE]BSD 3[/url]
