@@ -9,41 +9,68 @@
  * @copyright 2011-2020 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.3
+ * @version 1.4
  */
 
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-define('TRB_CDN', '//cdn.jsdelivr.net/jquery/3/jquery.min.js');
-
 class TopicRatingBar
 {
+	/**
+	 * Подключаем используемые хуки
+	 *
+	 * @return void
+	 */
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'TopicRatingBar::loadTheme', false);
-		add_integration_function('integrate_menu_buttons', 'TopicRatingBar::ratingPreload', false);
-		add_integration_function('integrate_actions', 'TopicRatingBar::actions', false);
-		add_integration_function('integrate_load_permissions', 'TopicRatingBar::loadPermissions', false);
-		add_integration_function('integrate_admin_areas', 'TopicRatingBar::adminAreas', false);
-		add_integration_function('integrate_modify_modifications', 'TopicRatingBar::modifyModifications', false);
+		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme', false);
+		add_integration_function('integrate_menu_buttons', __CLASS__ . '::ratingPreload', false);
+		add_integration_function('integrate_actions', __CLASS__ . '::actions', false);
+		add_integration_function('integrate_messageindex_buttons', __CLASS__ . '::showRatingOnMessageIndex', false);
+		add_integration_function('integrate_load_permissions', __CLASS__ . '::loadPermissions', false);
+		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false);
+		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications', false);
 	}
 
+	/**
+	 * Подключаем языковые строчки мода
+	 *
+	 * @return void
+	 */
 	public static function loadTheme()
 	{
-		global $modSettings;
+		global $context, $modSettings;
 
 		loadLanguage('TopicRatingBar/');
+
+		$context['trb_ignored_boards'] = [];
+		if (!empty($modSettings['tr_ignored_boards']))
+			$context['trb_ignored_boards'] = explode(",", $modSettings['tr_ignored_boards']);
+
+		if (!empty($context['current_board']) && !in_array($context['current_board'], $context['trb_ignored_boards']) && !empty($modSettings['tr_mini_rating']))
+			loadTemplate(false, 'trb_styles');
 
 		if (!empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 2)
 			clean_cache();
 	}
 
+	/**
+	 * Осуществляем различные проверки и вызываем необходимые функции
+	 *
+	 * @return void
+	 */
 	public static function ratingPreload()
 	{
-		global $context, $modSettings, $smcFunc, $board_info, $settings;
+		global $context, $board_info;
 
-		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action']) && (defined('WIRELESS') && !WIRELESS)) {
+		if (!empty($context['current_board']) && !empty($context['trb_ignored_boards']) && in_array($context['current_board'], $context['trb_ignored_boards']))
+			return;
+
+		if (defined('WIRELESS') && WIRELESS)
+			return;
+
+		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action'])) {
 			self::getBestTopic();
 
 			if (!empty($context['best_topic']))	{
@@ -58,68 +85,16 @@ class TopicRatingBar
 			}
 		}
 
-		if (!empty($context['current_board']) && (defined('WIRELESS') && !WIRELESS)) {
-			$context['rating_bar']   = [];
-			$context['topic_rating'] = [];
-			$rating_ignore_boards    = [];
-
-			if (!empty($modSettings['tr_ignore_boards']))
-				$rating_ignore_boards = explode(",", $modSettings['tr_ignore_boards']);
-
-			if (!empty($modSettings['recycle_board']))
-				$rating_ignore_boards[] = $modSettings['recycle_board'];
-
-			if (!in_array($context['current_board'], $rating_ignore_boards)) {
-				// Message Index
-				if (!empty($modSettings['tr_mini_rating']) && empty($context['current_topic'])) {
-					if (empty($context['no_topic_listing']) && !isset($_REQUEST['action']))	{
-						if (!empty($context['topics']))	{
-							$topics = array_keys($context['topics']);
-
-							$query = $smcFunc['db_query']('', '
-								SELECT id, total_votes, total_value
-								FROM {db_prefix}topic_ratings
-								WHERE id IN ({array_int:topics})
-								LIMIT ' . count($topics),
-								array(
-									'topics' => $topics
-								)
-							);
-
-							while ($row = $smcFunc['db_fetch_assoc']($query)) {
-								$context['topic_rating'][$row['id']] = array(
-									'votes' => $row['total_votes'],
-									'value' => $row['total_value']
-								);
-							}
-
-							$smcFunc['db_free_result']($query);
-						}
-					}
-
-					if (!empty($context['topic_rating']))
-						$context['html_headers'] .= "\n\t" . '<style type="text/css">
-		.topic_stars_main {
-			float: right;
-			margin-right: 50px;
-			margin-top: 10px;
-		}
-		.topic_stars {
-			background-image: url(' . $settings['default_images_url'] . '/trb/one_star.png);
-			background-repeat: no-repeat;
-		}
-	</style>';
-
-					self::showRatingOnMessageIndex();
-				}
-
-				// Display bar
-				if (empty($board_info['error']))
-					self::showRatingBar();
-			}
-		}
+		// Display bar
+		if (empty($board_info['error']))
+			self::showRatingBar();
 	}
 
+	/**
+	 * Получаем самую популярную тему форума
+	 *
+	 * @return void
+	 */
 	public static function getBestTopic()
 	{
 		global $modSettings, $smcFunc, $context, $scripturl, $txt;
@@ -127,24 +102,17 @@ class TopicRatingBar
 		if (empty($modSettings['tr_show_best_topic']))
 			return;
 
-		$ignore_boards = [];
-		if (!empty($modSettings['tr_ignore_boards']))
-			$ignore_boards = explode(",", $modSettings['tr_ignore_boards']);
-
-		if (!empty($modSettings['recycle_board']))
-			$ignore_boards[] = $modSettings['recycle_board'];
-
 		$query = $smcFunc['db_query']('', '
 			SELECT
-				tr.id, tr.total_votes, tr.total_value, t.id_last_msg, t.num_replies, ms.subject, ms2.id_member,
-				ms2.poster_time, ms2.subject AS last, IFNULL(m.real_name, 0) AS real_name
+				tr.id, tr.total_votes, tr.total_value, t.id_last_msg, t.num_replies, mf.subject, ml.id_member,
+				ml.poster_time, ml.subject AS last, IFNULL(mem.real_name, 0) AS real_name
 			FROM {db_prefix}topic_ratings AS tr
 				LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = tr.id)
-				LEFT JOIN {db_prefix}messages AS ms ON (ms.id_msg = t.id_first_msg)
-				LEFT JOIN {db_prefix}messages AS ms2 ON (ms2.id_msg = t.id_last_msg)
-				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = ms.id_board)
-				LEFT JOIN {db_prefix}members AS m ON (m.id_member = ms2.id_member)
-			WHERE m.id_member != 0' . (empty($ignore_boards) ? '' : '
+				LEFT JOIN {db_prefix}messages AS mf ON (mf.id_msg = t.id_first_msg)
+				LEFT JOIN {db_prefix}messages AS ml ON (ml.id_msg = t.id_last_msg)
+				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = mf.id_board)
+				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = ml.id_member)
+			WHERE mem.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
 				AND {query_see_board}
@@ -152,7 +120,7 @@ class TopicRatingBar
 			ORDER BY tr.total_value DESC
 			LIMIT 1',
 			array(
-				'ignore_boards' => $ignore_boards
+				'ignore_boards' => $context['trb_ignored_boards']
 			)
 		);
 
@@ -166,7 +134,7 @@ class TopicRatingBar
 				'replies'   => $row['num_replies'] + 1,
 				'time'      => $row['poster_time'] > 0 ? timeformat($row['poster_time']) : $txt['not_applicable'],
 				'last_post' => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.msg' . $row['id_last_msg'] . '#new" title="' . $row['last'] . '">' . $subject . '</a>',
-				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '" target="_blank">' . $row['real_name'] . '</a>',
+				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
 				'votes'     => $row['total_votes']
 			);
 		}
@@ -174,21 +142,47 @@ class TopicRatingBar
 		$smcFunc['db_free_result']($query);
 	}
 
-	private static function showRatingOnMessageIndex()
+	/**
+	 * Добавляем отображение рейтинга тем внутри разделов
+	 *
+	 * @return void
+	 */
+	public static function showRatingOnMessageIndex()
 	{
-		global $context, $txt, $settings;
+		global $modSettings, $context, $smcFunc, $settings, $txt;
 
-		if (!empty($context['topic_rating'])) {
-			$context['insert_after_template'] .= '
+		if (empty($modSettings['tr_mini_rating']) || empty($context['topics']))
+			return;
+
+		$topics = array_keys($context['topics']);
+
+		$query = $smcFunc['db_query']('', '
+			SELECT id, total_votes, total_value
+			FROM {db_prefix}topic_ratings
+			WHERE id IN ({array_int:topics})
+			LIMIT ' . count($topics),
+			array(
+				'topics' => $topics
+			)
+		);
+
+		while ($row = $smcFunc['db_fetch_assoc']($query)) {
+			$context['topic_rating'][$row['id']] = array(
+				'votes' => $row['total_votes'],
+				'value' => $row['total_value']
+			);
+		}
+
+		$smcFunc['db_free_result']($query);
+
+		if (empty($context['topic_rating']))
+			return;
+
+		$context['insert_after_template'] .= '
 	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="//cdn.jsdelivr.net/g/jquery@3,jquery.migrate@1"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		$star = jQuery.noConflict();
-		$star(document).ready(function($){';
-		} else {
-			$context['insert_after_template'] .= '
-	<script type="text/javascript"><!-- // --><![CDATA[
-		jQuery(document).ready(function($) {';
-		}
+		$star(document).ready(function($) {';
 
 		foreach ($context['topic_rating'] as $topic => $data) {
 			$rating = ($data['votes'] == 0) ? 0 : number_format($data['value'] / $data['votes'], 0);
@@ -197,14 +191,8 @@ class TopicRatingBar
 			for ($i = 0; $i < $rating; $i++)
 				$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
 
-			if (empty($version))
-				$context['insert_after_template'] .= '
-			var starImg' . $topic . ' = $star("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
-			else
-				$context['insert_after_template'] .= '
-			var starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
-
 			$context['insert_after_template'] .= '
+			var starImg' . $topic . ' = $star("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");
 			starImg' . $topic . '.before(\'<span class="topic_stars_main" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['votes'] . '">' . $img . '</span>\');';
 		}
 
@@ -213,6 +201,12 @@ class TopicRatingBar
 	// ]]></script>';
 	}
 
+	/**
+	 * Отображаем панель со звёздочками внутри темы
+	 *
+	 * @param integer $unit_width ширина звёздочки
+	 * @return void
+	 */
 	private static function showRatingBar($unit_width = 25)
 	{
 		global $context, $topicinfo, $smcFunc, $modSettings;
@@ -257,12 +251,23 @@ class TopicRatingBar
 		$context['template_layers'][] = 'bar';
 	}
 
+	/**
+	 * Добавляем свои actions
+	 *
+	 * @param array $actionArray
+	 * @return void
+	 */
 	public static function actions(&$actionArray)
 	{
 		$actionArray['trb_rate'] = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingControl'));
 		$actionArray['rating']   = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingTop'));
 	}
 
+	/**
+	 * Обработка оценки
+	 *
+	 * @return void
+	 */
 	public static function ratingControl()
 	{
 		global $modSettings, $smcFunc, $context;
@@ -328,12 +333,16 @@ class TopicRatingBar
 		exit;
 	}
 
+	/**
+	 * Отображение таблицы с популярными темами
+	 *
+	 * @return void
+	 */
 	public static function ratingTop()
 	{
 		global $context, $txt, $scripturl, $modSettings, $smcFunc;
 
 		loadTemplate('TopicRatingBar', 'trb_styles');
-
 		$context['sub_template']  = 'rating';
 		$context['page_title']    = $txt['tr_top_stat'];
 		$context['canonical_url'] = $scripturl . '?action=rating';
@@ -343,40 +352,32 @@ class TopicRatingBar
 			'url'  => $context['canonical_url']
 		);
 
-		$limit = !empty($modSettings['tr_count_topics']) ? (int) $modSettings['tr_count_topics'] : 0;
-
-		$ignore_boards = [];
-		if (!empty($modSettings['tr_ignore_boards']))
-			$ignore_boards = explode(",", $modSettings['tr_ignore_boards']);
-
-		if (!empty($modSettings['recycle_board']))
-			$ignore_boards[] = $modSettings['recycle_board'];
-
 		$query = $smcFunc['db_query']('', '
-			SELECT tr.id, tr.total_votes, tr.total_value, ms.subject, b.id_board, b.name, m.id_member, m.id_group, m.real_name, mg.group_name
+			SELECT tr.id, tr.total_votes, tr.total_value, m.subject, b.id_board, b.name, mem.id_member, mem.id_group, mem.real_name, mg.group_name
 			FROM {db_prefix}topic_ratings AS tr
 				LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = tr.id)
-				LEFT JOIN {db_prefix}messages AS ms ON (ms.id_msg = t.id_first_msg)
-				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = ms.id_board)
-				LEFT JOIN {db_prefix}members AS m ON (m.id_member = t.id_member_started)
-				LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = m.id_group)
-			WHERE m.id_member != 0' . (empty($ignore_boards) ? '' : '
+				LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = t.id_first_msg)
+				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board)
+				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = t.id_member_started)
+				LEFT JOIN {db_prefix}membergroups AS mg ON (mg.id_group = mem.id_group)
+			WHERE m.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
 				AND {query_see_board}
 			ORDER BY tr.total_votes DESC, tr.total_value DESC
-			LIMIT ' . $limit,
+			LIMIT {int:limit}',
 			array(
-				'ignore_boards' => $ignore_boards
+				'ignore_boards' => $context['trb_ignored_boards'],
+				'limit'         => !empty($modSettings['tr_count_topics']) ? (int) $modSettings['tr_count_topics'] : 0
 			)
 		);
 
 		$context['top_rating'] = [];
 		while ($row = $smcFunc['db_fetch_assoc']($query))
 			$context['top_rating'][$row['id']] = array(
-				'topic'  => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0" target="_blank">' . $row['subject'] . '</a>',
-				'board'  => '<a href="' . $scripturl . '?board=' . $row['id_board'] . '.0" target="_blank">' . $row['name'] . '</a>',
-				'author' => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '" target="_blank">' . $row['real_name'] . '</a>',
+				'topic'  => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0">' . $row['subject'] . '</a>',
+				'board'  => '<a href="' . $scripturl . '?board=' . $row['id_board'] . '.0">' . $row['name'] . '</a>',
+				'author' => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
 				'group'  => empty($row['id_group']) ? $txt['tr_regular_members'] : $row['group_name'],
 				'rating' => number_format($row['total_value'] / $row['total_votes'], 2),
 				'votes'  => $row['total_votes']
@@ -385,6 +386,13 @@ class TopicRatingBar
 		$smcFunc['db_free_result']($query);
 	}
 
+	/**
+	 * Добавляем разрешение на оценивание тем
+	 *
+	 * @param array $permissionGroups
+	 * @param array $permissionList
+	 * @return void
+	 */
 	public static function loadPermissions(&$permissionGroups, &$permissionList)
 	{
 		global $context;
@@ -393,6 +401,12 @@ class TopicRatingBar
 		$permissionList['membergroup']['rate_topics'] = array(false, 'general', 'view_basic_info');
 	}
 
+	/**
+	 * Заводим секцию для настроек мода в админке
+	 *
+	 * @param array $admin_areas
+	 * @return void
+	 */
 	public static function adminAreas(&$admin_areas)
 	{
 		global $txt;
@@ -400,11 +414,22 @@ class TopicRatingBar
 		$admin_areas['config']['areas']['modsettings']['subsections']['topic_rating'] = array($txt['tr_title']);
 	}
 
+	/**
+	 * Подключаем функцию с настройками мода
+	 *
+	 * @param array $subActions
+	 * @return void
+	 */
 	public static function modifyModifications(&$subActions)
 	{
 		$subActions['topic_rating'] = array('TopicRatingBar', 'settings');
 	}
 
+	/**
+	 * Настройки мода
+	 *
+	* @return void
+	*/
 	public static function settings()
 	{
 		global $txt, $context, $scripturl, $modSettings;
@@ -439,27 +464,27 @@ class TopicRatingBar
 		if (isset($_GET['save'])) {
 			checkSession();
 
-			if (empty($_POST['ignore_brd']))
-				$_POST['ignore_brd'] = [];
+			if (empty($_POST['ignore_board']))
+				$_POST['ignore_board'] = [];
 
 			unset($_POST['ignore_boards']);
-			if (isset($_POST['ignore_brd'])) {
-				if (!is_array($_POST['ignore_brd']))
-					$_POST['ignore_brd'] = array($_POST['ignore_brd']);
+			if (isset($_POST['ignore_board'])) {
+				if (!is_array($_POST['ignore_board']))
+					$_POST['ignore_board'] = array($_POST['ignore_board']);
 
-				foreach ($_POST['ignore_brd'] as $k => $d) {
+				foreach ($_POST['ignore_board'] as $k => $d) {
 					$d = (int) $d;
 					if ($d != 0)
-						$_POST['ignore_brd'][$k] = $d;
+						$_POST['ignore_board'][$k] = $d;
 					else
-						unset($_POST['ignore_brd'][$k]);
+						unset($_POST['ignore_board'][$k]);
 				}
-				$_POST['ignore_boards'] = implode(',', $_POST['ignore_brd']);
-				unset($_POST['ignore_brd']);
+				$_POST['ignore_boards'] = implode(',', $_POST['ignore_board']);
+				unset($_POST['ignore_board']);
 			}
 
 			saveDBSettings($config_vars);
-			updateSettings(array('tr_ignore_boards' => $_POST['ignore_boards']));
+			updateSettings(array('tr_ignored_boards' => $_POST['ignore_boards']));
 			clean_cache();
 			redirectexit('action=admin;area=modsettings;sa=topic_rating');
 		}
@@ -467,19 +492,24 @@ class TopicRatingBar
 		prepareDBSettingContext($config_vars);
 	}
 
+	/**
+	 * Формируем список разделов для установки игнорируемых
+	 *
+	 * @return void
+	 */
 	private static function ignoreBoards()
 	{
-		global $txt, $user_info, $context, $modSettings, $smcFunc;
+		global $smcFunc, $context, $modSettings;
 
 		$request = $smcFunc['db_query']('order_by_board_order', '
 			SELECT b.id_cat, c.name AS cat_name, b.id_board, b.name, b.child_level,
-				'. (!empty($modSettings['tr_ignore_boards']) ? 'b.id_board IN ({array_int:ignore_boards})' : '0') . ' AS is_ignored
+				'. (!empty($context['trb_ignored_boards']) ? 'b.id_board IN ({array_int:ignore_boards})' : '0') . ' AS is_ignored
 			FROM {db_prefix}boards AS b
 				LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 			WHERE redirect = {string:empty_string}' . (!empty($modSettings['recycle_board']) ? '
 				AND b.id_board != {int:recycle_board}' : ''),
 			array(
-				'ignore_boards' => !empty($modSettings['tr_ignore_boards']) ? explode(',', $modSettings['tr_ignore_boards']) : [],
+				'ignore_boards' => $context['trb_ignored_boards'],
 				'recycle_board' => !empty($modSettings['recycle_board']) ? $modSettings['recycle_board'] : null,
 				'empty_string'  => ''
 			)

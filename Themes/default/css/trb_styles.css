@@ -5,7 +5,7 @@
 	padding: 0;
 	height: 25px;
 	position: relative;
-	background: url(../images/trb/all_stars.png) top left repeat-x;		
+	background: url(../images/trb/all_stars.png) top left repeat-x;
 	float: right;
 }
 .unit-rating li {
@@ -37,7 +37,7 @@
 .unit-rating span.r2-unit:hover{width:50px}
 .unit-rating span.r3-unit{left:50px}
 .unit-rating span.r3-unit:hover{width:75px}
-.unit-rating span.r4-unit{left:75px}	
+.unit-rating span.r4-unit{left:75px}
 .unit-rating span.r4-unit:hover{width:100px}
 .unit-rating span.r5-unit{left:100px}
 .unit-rating span.r5-unit:hover{width:125px}
@@ -63,8 +63,8 @@
 .headerSortUp {color: blue !important}
 .headerSortDown {color: red !important}
 .title_barIC img.icon {
-    float: left;
-    margin: 5px 8px 0 0;
+	float: left;
+	margin: 5px 8px 0 0;
 	width: 20px;
 }
 .title_barIC .title {
@@ -72,6 +72,15 @@
 	font-size: 0.9em;
 	font-weight: bold;
 	line-height: 31px;
+}
+.topic_stars_main {
+	float: right;
+	margin-right: 50px;
+	margin-top: 10px;
+}
+.topic_stars {
+	background-image: url(../images/trb/one_star.png);
+	background-repeat: no-repeat;
 }
 @media screen and (max-width: 360px) {
 	.title_barIC .ie6_header {

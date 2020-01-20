@@ -46,7 +46,7 @@ function template_rating()
 			</tbody>
 		</table>
 	</div>
-	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
+	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="//cdn.jsdelivr.net/jquery/3/jquery.min.js"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript"><!-- // --><![CDATA[
 		jQuery(document).ready(function($) {
@@ -76,7 +76,7 @@ function template_bar_above()
 	$header = '
 	<div class="title_barIC">
 		<span class="ie6_header ' . ($context['right_to_left'] ? 'floatright' : 'floatleft') . '">
-			<a href="' . $scripturl . '?action=rating" target="_blank">
+			<a href="' . $scripturl . '?action=rating">
 				<img class="icon" alt="" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png" />
 			</a>
 		</span>';
@@ -97,15 +97,13 @@ function template_bar_above()
 			<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
 		</li>';
 
-		for ($ncount = 1; $ncount <= $context['rating_bar']['units']; $ncount++) {
+		for ($i = 1; $i <= $context['rating_bar']['units']; $i++) {
 			if (empty($context['rating_bar']['voted']))
 				echo '
 		<li>
-			<span title="', $rates[$ncount-1], '" class="r', $ncount, '-unit rater">', $ncount, '</span>
+			<span title="', $rates[$i-1], '" class="r', $i, '-unit rater">', $i, '</span>
 		</li>';
 		}
-
-		$ncount = 0;
 
 		echo '
 	</ul>
@@ -127,7 +125,7 @@ function template_bar_above()
 	}
 
 	echo '
-	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="', TRB_CDN, '"%3E%3C/script%3E\'))</script>
+	<script type="text/javascript">window.jQuery || document.write(unescape(\'%3Cscript src="//cdn.jsdelivr.net/jquery/3/jquery.min.js"%3E%3C/script%3E\'))</script>
 	<script type="text/javascript">
 		var work = "', $scripturl, '?action=trb_rate";
 		jQuery(document).ready(function($) {
@@ -247,7 +245,7 @@ function template_callback_tr_ignored_boards()
 
 			echo '
 					<li class="board" style="margin-', $context['right_to_left'] ? 'right' : 'left', ': ', $board['child_level'], 'em;">
-						<label for="ignore_brd', $board['id'], '"><input type="checkbox" id="ignore_brd', $board['id'], '" name="ignore_brd[', $board['id'], ']" value="', $board['id'], '"', $board['selected'] ? ' checked="checked"' : '', ' class="input_check" /> ', $board['name'], '</label>
+						<label for="ignore_board', $board['id'], '"><input type="checkbox" id="ignore_board', $board['id'], '" name="ignore_board[', $board['id'], ']" value="', $board['id'], '"', $board['selected'] ? ' checked="checked"' : '', ' class="input_check" /> ', $board['name'], '</label>
 					</li>';
 
 			$i++;
