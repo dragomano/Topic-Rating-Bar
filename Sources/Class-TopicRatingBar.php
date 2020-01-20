@@ -9,7 +9,7 @@
  * @copyright 2011-2020 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.5
+ * @version 1.6
  */
 
 if (!defined('SMF'))
@@ -24,14 +24,17 @@ class TopicRatingBar
 	 */
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'TopicRatingBar::loadTheme', false, __FILE__);
-		add_integration_function('integrate_menu_buttons', 'TopicRatingBar::menuButtons', false, __FILE__);
-		add_integration_function('integrate_actions', 'TopicRatingBar::actions', false, __FILE__);
-		add_integration_function('integrate_load_illegal_guest_permissions', 'TopicRatingBar::loadIllegalGuestPermissions', false, __FILE__);
-		add_integration_function('integrate_load_permissions', 'TopicRatingBar::loadPermissions', false, __FILE__);
-		add_integration_function('integrate_admin_areas', 'TopicRatingBar::adminAreas', false, __FILE__);
-		add_integration_function('integrate_admin_search', 'TopicRatingBar::adminSearch', false, __FILE__);
-		add_integration_function('integrate_modify_modifications', 'TopicRatingBar::modifyModifications', false, __FILE__);
+		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme', false, __FILE__);
+		add_integration_function('integrate_menu_buttons', __CLASS__ . '::menuButtons', false, __FILE__);
+		add_integration_function('integrate_actions', __CLASS__ . '::actions', false, __FILE__);
+		add_integration_function('integrate_load_illegal_guest_permissions', __CLASS__ . '::loadIllegalGuestPermissions', false, __FILE__);
+		add_integration_function('integrate_load_permissions', __CLASS__ . '::loadPermissions', false, __FILE__);
+		add_integration_function('integrate_remove_topics', __CLASS__ . '::removeTopics', false, __FILE__);
+		add_integration_function('integrate_message_index', __CLASS__ . '::messageIndex', false, __FILE__);
+		add_integration_function('integrate_messageindex_buttons', __CLASS__ . '::showRatingOnMessageIndex', false, __FILE__);
+		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false, __FILE__);
+		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch', false, __FILE__);
+		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications', false, __FILE__);
 	}
 
 	/**
@@ -46,7 +49,6 @@ class TopicRatingBar
 		loadLanguage('TopicRatingBar/');
 
 		$context['trb_ignored_boards'] = [];
-
 		if (!empty($modSettings['tr_ignored_boards']))
 			$context['trb_ignored_boards'] = explode(",", $modSettings['tr_ignored_boards']);
 
@@ -61,17 +63,19 @@ class TopicRatingBar
 	 */
 	public static function menuButtons()
 	{
-		global $context, $modSettings, $smcFunc, $board_info;
+		global $context;
 
 		if (!empty($context['current_board']) && !empty($context['trb_ignored_boards']) && in_array($context['current_board'], $context['trb_ignored_boards']))
 			return;
 
+		// Отображение блока с рейтинговыми темами на главной странице форума
 		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action'])) {
 			self::getBestTopic();
 
 			if (!empty($context['best_topic']))	{
 				loadTemplate('TopicRatingBar');
 
+				// Убедимся, что наш блок будет выше блоков портала
 				if (isset($context['template_layers'][2]) && $context['template_layers'][2] == 'portal') {
 					$context['template_layers'][]  = 'portal';
 					$context['template_layers'][2] = 'best_topics';
@@ -80,47 +84,97 @@ class TopicRatingBar
 			}
 		}
 
-		if (!empty($context['current_board'])) {
-			$context['rating_bar']   = [];
-			$context['topic_rating'] = [];
+		self::showRatingBar();
+	}
 
-			// Message Index
-			if (!empty($modSettings['tr_mini_rating'])) {
-				if (empty($context['no_topic_listing']) && !isset($_REQUEST['action']))	{
-					if (!empty($context['topics']))	{
-						$topics = array_keys($context['topics']);
+	/**
+	 * Получаем самую популярную тему форума
+	 *
+	 * @return void
+	 */
+	public static function getBestTopic()
+	{
+		global $modSettings, $smcFunc, $context, $scripturl, $txt;
 
-						$query = $smcFunc['db_query']('', '
-							SELECT id, total_votes, total_value
-							FROM {db_prefix}topic_ratings
-							WHERE id IN ({array_int:topics})
-							LIMIT ' . count($topics),
-							array(
-								'topics' => $topics
-							)
-						);
+		if (empty($modSettings['tr_show_best_topic']))
+			return;
 
-						while ($row = $smcFunc['db_fetch_assoc']($query)) {
-							$context['topic_rating'][$row['id']] = array(
-								'votes' => $row['total_votes'],
-								'value' => $row['total_value']
-							);
-						}
+		$query = $smcFunc['db_query']('', '
+			SELECT
+				tr.id, tr.total_votes, tr.total_value, t.id_last_msg, t.num_replies, mf.subject, ml.id_member,
+				ml.poster_time, ml.subject AS last, COALESCE(mem.real_name, 0) AS real_name
+			FROM {db_prefix}topic_ratings AS tr
+				LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = tr.id)
+				LEFT JOIN {db_prefix}messages AS mf ON (mf.id_msg = t.id_first_msg)
+				LEFT JOIN {db_prefix}messages AS ml ON (ml.id_msg = t.id_last_msg)
+				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = mf.id_board)
+				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = ml.id_member)
+			WHERE t.id_member_started != 0' . (empty($context['trb_ignored_boards']) ? '' : '
+				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
+				AND {query_wanna_see_board}
+				AND t.locked = 0
+			ORDER BY tr.total_value DESC
+			LIMIT 1',
+			array(
+				'ignore_boards' => $context['trb_ignored_boards']
+			)
+		);
 
-						$smcFunc['db_free_result']($query);
-					}
-				}
+		$context['best_topic'] = [];
+		while ($row = $smcFunc['db_fetch_assoc']($query)) {
+			$subject   = shorten_subject($row['subject'], 50);
+			$last_post = shorten_subject($row['last'], 36);
 
-				if (!empty($context['topic_rating']))
-					loadCssFile('trb_styles.css');
+			$context['best_topic'] = array(
+				'topic'     => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0" class="subject" title="' . $row['subject'] . '">' . $subject . '</a>',
+				'rating'    => number_format($row['total_value'] / $row['total_votes'], 2),
+				'replies'   => $row['num_replies'] + 1,
+				'time'      => $row['poster_time'] > 0 ? timeformat($row['poster_time']) : $txt['not_applicable'],
+				'last_post' => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.msg' . $row['id_last_msg'] . '#new" title="' . $row['last'] . '">' . $last_post . '</a>',
+				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
+				'votes'     => $row['total_votes']
+			);
+		}
 
-				self::showRatingOnMessageIndex();
+		$smcFunc['db_free_result']($query);
+	}
+
+	/**
+	 * Добавляем отображение рейтинга тем внутри разделов
+	 *
+	 * @return void
+	 */
+	public static function showRatingOnMessageIndex()
+	{
+		global $context, $txt;
+
+		if (empty($context['topics']))
+			return;
+
+		loadCssFile('trb_styles.css');
+
+		$context['insert_after_template'] .= '
+		<script>
+			jQuery(document).ready(function($) {';
+
+			foreach ($context['topics'] as $topic => $data) {
+				$rating = ($data['tr_votes'] == 0) ? 0 : number_format($data['tr_value'] / $data['tr_votes'], 0);
+
+				if (empty($rating))
+					continue;
+
+				$img = '';
+				for ($i = 0; $i < $rating; $i++)
+					$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
+
+				$context['insert_after_template'] .= '
+				let starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");
+				starImg' . $topic . '.before(\'<span class="topic_stars_main" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['tr_votes'] . '">' . $img . '</span>\');';
 			}
 
-			// Display bar
-			if (empty($board_info['error']))
-				self::showRatingBar();
-		}
+			$context['insert_after_template'] .= '
+			});
+		</script>';
 	}
 
 	/**
@@ -131,9 +185,9 @@ class TopicRatingBar
 	 */
 	private static function showRatingBar($unit_width = 25)
 	{
-		global $smcFunc, $context, $modSettings;
+		global $board_info, $smcFunc, $context, $modSettings;
 
-		if (empty($context['current_topic']) || empty($context['topicinfo']['id_member_started']))
+		if (!empty($board_info['error']) || empty($context['current_topic']) || empty($context['topicinfo']['id_member_started']))
 			return;
 
 		$query = $smcFunc['db_query']('', '
@@ -174,41 +228,6 @@ class TopicRatingBar
 	}
 
 	/**
-	 * Добавляем отображение рейтинга тем внутри разделов
-	 *
-	 * @return void
-	 */
-	private static function showRatingOnMessageIndex()
-	{
-		global $context, $txt;
-
-		if (empty($context['topic_rating']))
-			return;
-
-		$context['insert_after_template'] .= '
-	<script>
-		jQuery(document).ready(function($) {';
-
-		foreach ($context['topic_rating'] as $topic => $data) {
-			$rating = ($data['votes'] == 0) ? 0 : number_format($data['value'] / $data['votes'], 0);
-
-			$img = '';
-			for ($i = 0; $i < $rating; $i++)
-				$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
-
-		$context['insert_after_template'] .= '
-			let starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");';
-
-		$context['insert_after_template'] .= '
-			starImg' . $topic . '.before(\'<span class="topic_stars_main" title="' . $txt['tr_average'] . ': ' . $rating . ' | ' . $txt['tr_votes'] . ': ' . $data['votes'] . '">' . $img . '</span>\');';
-			}
-
-		$context['insert_after_template'] .= '
-		});
-	</script>';
-	}
-
-	/**
 	 * Добавляем свои actions
 	 *
 	 * @param array $actionArray
@@ -216,8 +235,8 @@ class TopicRatingBar
 	 */
 	public static function actions(&$actionArray)
 	{
-		$actionArray['trb_rate'] = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingControl'));
-		$actionArray['rating']   = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingTop'));
+		$actionArray['trb_rate'] = array('Class-TopicRatingBar.php', array(__CLASS__, 'ratingControl'));
+		$actionArray['rating']   = array('Class-TopicRatingBar.php', array(__CLASS__, 'ratingTop'));
 	}
 
 	/**
@@ -309,8 +328,6 @@ class TopicRatingBar
 			'url'  => $context['canonical_url']
 		);
 
-		$limit = !empty($modSettings['tr_count_topics']) ? (int) $modSettings['tr_count_topics'] : 0;
-
 		$query = $smcFunc['db_query']('', '
 			SELECT tr.id, tr.total_votes, tr.total_value, m.subject, b.id_board, b.name, mem.id_member, mem.id_group, mem.real_name, mg.group_name
 			FROM {db_prefix}topic_ratings AS tr
@@ -324,9 +341,10 @@ class TopicRatingBar
 				AND {query_wanna_see_board}
 				AND {query_wanna_see_message_board}
 			ORDER BY tr.total_votes DESC, tr.total_value DESC
-			LIMIT ' . $limit,
+			LIMIT {int:limit}',
 			array(
-				'ignore_boards' => $context['trb_ignored_boards']
+				'ignore_boards' => $context['trb_ignored_boards'],
+				'limit'         => !empty($modSettings['tr_count_topics']) ? (int) $modSettings['tr_count_topics'] : 0
 			)
 		);
 
@@ -369,55 +387,43 @@ class TopicRatingBar
 	}
 
 	/**
-	 * Получаем самую популярную тему форума
+	 * Удаляем оценки при удалении темы
 	 *
+	 * @param array $topics
 	 * @return void
 	 */
-	public static function getBestTopic()
+	public static function removeTopics($topics)
 	{
-		global $modSettings, $smcFunc, $context, $scripturl, $txt;
+		global $smcFunc;
 
-		if (empty($modSettings['tr_show_best_topic']))
+		if (empty($topics))
 			return;
 
-		$query = $smcFunc['db_query']('', '
-			SELECT
-				tr.id, tr.total_votes, tr.total_value, t.id_last_msg, t.num_replies, mf.subject, ml.id_member,
-				ml.poster_time, ml.subject AS last, COALESCE(mem.real_name, 0) AS real_name
-			FROM {db_prefix}topic_ratings AS tr
-				LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = tr.id)
-				LEFT JOIN {db_prefix}messages AS mf ON (mf.id_msg = t.id_first_msg)
-				LEFT JOIN {db_prefix}messages AS ml ON (ml.id_msg = t.id_last_msg)
-				LEFT JOIN {db_prefix}boards AS b ON (b.id_board = mf.id_board)
-				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = ml.id_member)
-			WHERE t.id_member_started != 0' . (empty($context['trb_ignored_boards']) ? '' : '
-				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
-				AND {query_wanna_see_board}
-				AND t.locked = 0
-			ORDER BY tr.total_value DESC
-			LIMIT 1',
+		$request = $smcFunc['db_query']('', '
+			DELETE FROM {db_prefix}topic_ratings
+			WHERE id IN ({array_int:topics})',
 			array(
-				'ignore_boards' => $context['trb_ignored_boards']
+				'topics' => $topics
 			)
 		);
+	}
 
-		$context['best_topic'] = [];
-		while ($row = $smcFunc['db_fetch_assoc']($query)) {
-			$subject   = shorten_subject($row['subject'], 50);
-			$last_post = shorten_subject($row['last'], 36);
+	/**
+	 * Добавляем выборку значений рейтинга при просмотре тем внутри разделов
+	 *
+	 * @param array $message_index_selects
+	 * @param array $message_index_tables
+	 * @return void
+	 */
+	public static function messageIndex(&$message_index_selects, &$message_index_tables)
+	{
+		global $modSettings;
 
-			$context['best_topic'] = array(
-				'topic'     => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0" class="subject" title="' . $row['subject'] . '">' . $subject . '</a>',
-				'rating'    => number_format($row['total_value'] / $row['total_votes'], 2),
-				'replies'   => $row['num_replies'] + 1,
-				'time'      => $row['poster_time'] > 0 ? timeformat($row['poster_time']) : $txt['not_applicable'],
-				'last_post' => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.msg' . $row['id_last_msg'] . '#new" title="' . $row['last'] . '">' . $last_post . '</a>',
-				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
-				'votes'     => $row['total_votes']
-			);
-		}
+		if (empty($modSettings['tr_mini_rating']))
+			return;
 
-		$smcFunc['db_free_result']($query);
+		$message_index_selects[] = 'total_votes AS tr_votes, total_value AS tr_value';
+		$message_index_tables[]  = 'LEFT JOIN {db_prefix}topic_ratings AS tr ON (tr.id = t.id_topic)';
 	}
 
 	/**
@@ -443,7 +449,7 @@ class TopicRatingBar
 	 */
 	public static function adminSearch(&$language_files, &$include_files, &$settings_search)
 	{
-		$settings_search[] = array(array('TopicRatingBar', 'settings'), 'area=modsettings;sa=topic_rating');
+		$settings_search[] = array(array(__CLASS__, 'settings'), 'area=modsettings;sa=topic_rating');
 	}
 
 	/**
@@ -454,7 +460,7 @@ class TopicRatingBar
 	 */
 	public static function modifyModifications(&$subActions)
 	{
-		$subActions['topic_rating'] = array('TopicRatingBar', 'settings');
+		$subActions['topic_rating'] = array(__CLASS__, 'settings');
 	}
 
 	/**
@@ -462,8 +468,8 @@ class TopicRatingBar
 	 *
 	 * @param boolean $return_config
 	 *
-     * @return array
-	 */
+	* @return array
+	*/
 	public static function settings($return_config = false)
 	{
 		global $context, $txt, $scripturl, $modSettings;
