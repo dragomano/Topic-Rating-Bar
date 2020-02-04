@@ -9,7 +9,7 @@
  * @copyright 2011-2020 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.4
+ * @version 1.4.1
  */
 
 if (!defined('SMF'))
@@ -115,7 +115,6 @@ class TopicRatingBar
 			WHERE mem.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
-				AND {query_see_board}
 				AND t.locked = 0
 			ORDER BY tr.total_value DESC
 			LIMIT 1',
@@ -363,7 +362,6 @@ class TopicRatingBar
 			WHERE m.id_member != 0' . (empty($context['trb_ignored_boards']) ? '' : '
 				AND b.id_board NOT IN ({array_int:ignore_boards})') . '
 				AND {query_wanna_see_board}
-				AND {query_see_board}
 			ORDER BY tr.total_votes DESC, tr.total_value DESC
 			LIMIT {int:limit}',
 			array(
