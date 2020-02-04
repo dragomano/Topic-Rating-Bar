@@ -1,4 +1,7 @@
 # Topic Rating Bar
+![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)
+![License](https://img.shields.io/github/license/dragomano/topic-rating-bar)
+
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/topic-rating-bar)
 * **License:** [BSD 3](https://github.com/dragomano/Topic-Rating-Bar/blob/master/LICENSE)
 * **Compatible with:** SMF 2.1.*
