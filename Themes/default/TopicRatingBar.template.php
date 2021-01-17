@@ -16,7 +16,7 @@ function template_rating()
 		echo '
 	<p class="information">', $txt['tr_top_desc'], '</p>
 	<div class="tborder topic_table centertext">
-		<table class="table_grid">
+		<table class="trb table_grid">
 			<thead>
 				<tr class="title_bar">
 					<th>', $txt['topic'], '</th>

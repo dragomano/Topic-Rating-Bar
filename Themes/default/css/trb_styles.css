@@ -258,18 +258,18 @@ Default Theme
 }
 
 @media (max-width: 720px) {
-	th:nth-child(2) {
+	.trb th:nth-child(2) {
 		display: none;
 	}
-	td:nth-child(2) {
+	.trb td:nth-child(2) {
 		display: none;
 	}
 }
 @media (max-width: 468px) {
-	th:nth-child(4) {
+	.trb th:nth-child(4) {
 		display: none;
 	}
-	td:nth-child(4) {
+	.trb td:nth-child(4) {
 		display: none;
 	}
 }
