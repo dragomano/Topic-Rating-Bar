@@ -6,10 +6,10 @@
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2011-2020 Bugo
+ * @copyright 2011-2021 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.4.1
+ * @version 1.4.2
  */
 
 if (!defined('SMF'))
@@ -258,8 +258,8 @@ class TopicRatingBar
 	 */
 	public static function actions(&$actionArray)
 	{
-		$actionArray['trb_rate'] = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingControl'));
-		$actionArray['rating']   = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'ratingTop'));
+		$actionArray['trb_rate'] = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'prepareScore'));
+		$actionArray['rating']   = array('Class-TopicRatingBar.php', array('TopicRatingBar', 'showScoreTable'));
 	}
 
 	/**
@@ -267,17 +267,17 @@ class TopicRatingBar
 	 *
 	 * @return void
 	 */
-	public static function ratingControl()
+	public static function prepareScore()
 	{
 		global $modSettings, $smcFunc, $context;
+
+		if (empty($_REQUEST['stars']) || empty($_REQUEST['topic']) || empty($_REQUEST['user']))
+			redirectexit();
 
 		$vote_sent   = (int) $_REQUEST['stars'];
 		$topic       = (int) $_REQUEST['topic'];
 		$user_id_num = (int) $_REQUEST['user'];
 		$units       = empty($modSettings['tr_rate_system']) ? 5 : 10;
-
-		if (empty($vote_sent) || empty($topic) || empty($user_id_num))
-			exit;
 
 		$query = $smcFunc['db_query']('', '
 			SELECT total_votes, total_value, user_ids
@@ -290,14 +290,19 @@ class TopicRatingBar
 		);
 
 		$numbers = $smcFunc['db_fetch_assoc']($query);
-
 		$smcFunc['db_free_result']($query);
 
-		$check_user_id  = @unserialize($numbers['user_ids']);
-		$current_rating = $numbers['total_value'];
+		$check_user_id  = 0;
+		$current_rating = 0;
+		$count          = 0;
+
+		if (!empty($numbers)) {
+			$check_user_id  = @unserialize($numbers['user_ids']);
+			$current_rating = $numbers['total_value'];
+			$count          = $numbers['total_votes'];
+		}
 
 		$voted = empty($check_user_id) ? false : in_array($user_id_num, $check_user_id);
-		$count = $numbers['total_votes'];
 		$total = $vote_sent + $current_rating;
 		$votes = $total == 0 ? 0 : $count + 1;
 
@@ -337,9 +342,9 @@ class TopicRatingBar
 	 *
 	 * @return void
 	 */
-	public static function ratingTop()
+	public static function showScoreTable()
 	{
-		global $context, $txt, $scripturl, $modSettings, $smcFunc;
+		global $context, $txt, $scripturl, $smcFunc, $modSettings;
 
 		loadTemplate('TopicRatingBar', 'trb_styles');
 		$context['sub_template']  = 'rating';

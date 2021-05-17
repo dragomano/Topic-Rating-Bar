@@ -2,7 +2,7 @@
 
 function template_rating()
 {
-	global $settings, $context, $txt;
+	global $settings, $txt, $context;
 
 	echo '
 	<div class="cat_bar">
@@ -57,9 +57,11 @@ function template_rating()
 		echo '
 	<p class="information">', $txt['tr_top_empty'], '</p>';
 
+	$link = in_array($context['user']['language'], array('russian','russian-utf8')) ? 'https://dragomano.ru/mods/topic-rating-bar' : 'https://custom.simplemachines.org/mods/index.php?mod=3236';
+
 	echo '
 	<br class="clear" />
-	<div class="smalltext centertext"><a href="https://dragomano.ru/mods/topic-rating-bar" target="_blank">Topic Rating Bar</a></div>';
+	<div class="smalltext centertext"><a href="', $link, '" target="_blank" rel="noopener">Topic Rating Bar</a></div>';
 }
 
 function template_bar_above()
