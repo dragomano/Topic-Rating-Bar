@@ -2,12 +2,12 @@
 
 function template_rating()
 {
-	global $settings, $context, $txt;
+	global $settings, $txt, $context;
 
 	echo '
 	<div class="cat_bar">
 		<h3 class="catbg">
-			<img class="icon" width="16" src="', $settings['default_images_url'], '/trb/statistics.png" alt="">
+			<img alt="*" class="icon" width="16" src="', $settings['default_images_url'], '/trb/statistics.png">
 			', $txt['tr_top_topics'], '
 		</h3>
 	</div>';
@@ -29,7 +29,7 @@ function template_rating()
 			</thead>
 			<tbody>';
 
-		foreach ($context['top_rating'] as $id => $data) {
+		foreach ($context['top_rating'] as $data) {
 			echo '
 				<tr class="windowbg">
 					<td>', $data['topic'], '</td>
@@ -55,7 +55,7 @@ function template_rating()
 		echo '
 	<p class="information">', $txt['tr_top_empty'], '</p>';
 
-	$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/topic-rating-bar' : 'https://custom.simplemachines.org/mods/index.php?mod=3236';
+	$link = $context['user']['language'] === 'russian' ? 'https://dragomano.ru/mods/topic-rating-bar' : 'https://custom.simplemachines.org/mods/index.php?mod=3236';
 
 	echo '
 	<br class="clear">
@@ -105,7 +105,7 @@ function template_bar_above()
 
 		echo '
 		</ul>', $footer;
-	} elseif ($context['rating_bar']['current'] > 0) {
+	} elseif (!empty($context['rating_bar']['current'])) {
 		echo $header, '
 		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
 			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;">
@@ -120,7 +120,8 @@ function template_bar_above()
 		</ul>', $footer;
 	}
 
-	echo '
+	if (!empty($context['proper_user']))
+		echo '
 	<script>
 		let work = smf_scripturl + "?action=trb_rate";
 		jQuery(document).ready(function($) {
@@ -150,7 +151,7 @@ function template_bar_below()
 
 function template_best_topics_above()
 {
-	global $txt, $settings, $scripturl, $context;
+	global $txt, $settings, $context, $scripturl;
 
 	echo '
 	<div id="best_topics">

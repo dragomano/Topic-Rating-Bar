@@ -5,7 +5,7 @@
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/topic-rating-bar)
 * **License:** [BSD 3](https://github.com/dragomano/Topic-Rating-Bar/blob/master/LICENSE)
 * **Compatible with:** SMF 2.1.*
-* **Tested on:** PHP 8.0.9 / MariaDB 10.5.10
+* **Tested on:** PHP 8.1.0 / MariaDB 10.6.5
 * **Hooks only:** Yes
 * **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish
 

@@ -6,10 +6,10 @@
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2011-2021 Bugo
+ * @copyright 2011-2022 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.7
+ * @version 1.7.1
  */
 
 if (!defined('SMF'))
@@ -17,10 +17,10 @@ if (!defined('SMF'))
 
 class TopicRatingBar
 {
+	public const UNIT_WIDTH = 25;
+
 	/**
 	 * Подключаем используемые хуки
-	 *
-	 * @return void
 	 */
 	public function hooks()
 	{
@@ -39,8 +39,6 @@ class TopicRatingBar
 
 	/**
 	 * Подключаем языковые строчки мода
-	 *
-	 * @return void
 	 */
 	public function loadTheme()
 	{
@@ -58,8 +56,6 @@ class TopicRatingBar
 
 	/**
 	 * Осуществляем различные проверки и вызываем необходимые функции
-	 *
-	 * @return void
 	 */
 	public function menuButtons()
 	{
@@ -89,9 +85,6 @@ class TopicRatingBar
 
 	/**
 	 * Добавляем свои actions
-	 *
-	 * @param array $actionArray
-	 * @return void
 	 */
 	public function actions(array &$actionArray)
 	{
@@ -102,7 +95,7 @@ class TopicRatingBar
 	/**
 	 * Прячем право на оценку тем для гостей
 	 *
-	 * @return void
+	 * @hook integrate_load_illegal_guest_permissions
 	 */
 	public function loadIllegalGuestPermissions()
 	{
@@ -114,9 +107,7 @@ class TopicRatingBar
 	/**
 	 * Добавляем разрешение на оценивание тем
 	 *
-	 * @param array $permissionGroups
-	 * @param array $permissionList
-	 * @return void
+	 * @hook integrate_load_permissions
 	 */
 	public function loadPermissions(array &$permissionGroups, array &$permissionList)
 	{
@@ -125,9 +116,6 @@ class TopicRatingBar
 
 	/**
 	 * Удаляем оценки при удалении темы
-	 *
-	 * @param array $topics
-	 * @return void
 	 */
 	public function removeTopics(array $topics)
 	{
@@ -136,7 +124,7 @@ class TopicRatingBar
 		if (empty($topics))
 			return;
 
-		$request = $smcFunc['db_query']('', '
+		$smcFunc['db_query']('', '
 			DELETE FROM {db_prefix}topic_ratings
 			WHERE id IN ({array_int:topics})',
 			array(
@@ -147,10 +135,6 @@ class TopicRatingBar
 
 	/**
 	 * Добавляем выборку значений рейтинга при просмотре тем внутри разделов
-	 *
-	 * @param array $message_index_selects
-	 * @param array $message_index_tables
-	 * @return void
 	 */
 	public function messageIndex(array &$message_index_selects, array &$message_index_tables)
 	{
@@ -165,9 +149,6 @@ class TopicRatingBar
 
 	/**
 	 * Заводим секцию для настроек мода в админке
-	 *
-	 * @param array $admin_areas
-	 * @return void
 	 */
 	public function adminAreas(array &$admin_areas)
 	{
@@ -178,11 +159,6 @@ class TopicRatingBar
 
 	/**
 	 * Легкий доступ к настройкам мода через быстрый поиск в админке
-	 *
-	 * @param array $language_files
-	 * @param array $include_files
-	 * @param array $settings_search
-	 * @return void
 	 */
 	public function adminSearch(array &$language_files, array &$include_files, array &$settings_search)
 	{
@@ -191,9 +167,6 @@ class TopicRatingBar
 
 	/**
 	 * Подключаем функцию с настройками мода
-	 *
-	 * @param array $subActions
-	 * @return void
 	 */
 	public function modifyModifications(array &$subActions)
 	{
@@ -203,9 +176,7 @@ class TopicRatingBar
 	/**
 	 * Настройки мода
 	 *
-	 * @param bool $return_config
-	 *
-	* @return array
+	 * @return void|array
 	*/
 	public function settings(bool $return_config = false)
 	{
@@ -251,8 +222,6 @@ class TopicRatingBar
 
 	/**
 	 * Получаем самую популярную тему форума
-	 *
-	 * @return void
 	 */
 	public function getBestTopic()
 	{
@@ -261,7 +230,7 @@ class TopicRatingBar
 		if (empty($modSettings['tr_show_best_topic']))
 			return;
 
-		$query = $smcFunc['db_query']('', '
+		$query = $smcFunc['db_query']('', /** @lang text */ '
 			SELECT
 				tr.id, tr.total_votes, tr.total_value, t.id_last_msg, t.num_replies, mf.subject, ml.id_member,
 				ml.poster_time, ml.subject AS last, COALESCE(mem.real_name, 0) AS real_name
@@ -304,30 +273,28 @@ class TopicRatingBar
 	/**
 	 * Добавляем отображение рейтинга тем внутри разделов
 	 *
-	 * @return void
+	 * @hook integrate_messageindex_buttons
 	 */
 	public function showRatingOnMessageIndex()
 	{
-		global $context, $txt;
+		global $modSettings, $context, $txt;
 
-		if (empty($context['topics']))
+		if (empty($modSettings['tr_mini_rating']) || empty($context['topics']))
 			return;
 
-		loadCssFile('trb_styles.css');
+		loadCSSFile('trb_styles.css');
 
 		$context['insert_after_template'] .= '
 		<script>
 			jQuery(document).ready(function($) {';
 
 			foreach ($context['topics'] as $topic => $data) {
-				$rating = ($data['tr_votes'] == 0) ? 0 : number_format($data['tr_value'] / $data['tr_votes'], 0);
+				$rating = empty($data['tr_votes']) ? 0 : number_format($data['tr_value'] / $data['tr_votes']);
 
 				if (empty($rating))
 					continue;
 
-				$img = '';
-				for ($i = 0; $i < $rating; $i++)
-					$img .= '<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>';
+				$img = str_repeat('<span class="topic_stars">&nbsp;&nbsp;&nbsp;</span>', $rating);
 
 				$context['insert_after_template'] .= '
 				let starImg' . $topic . ' = $("span#msg_' . $context['topics'][$topic]['first_post']['id'] . '");
@@ -341,8 +308,6 @@ class TopicRatingBar
 
 	/**
 	 * Обработка оценки
-	 *
-	 * @return void
 	 */
 	public function ratingControl()
 	{
@@ -360,19 +325,16 @@ class TopicRatingBar
 
 		$checkedUserIds = $this->getParsedUserIds($ratingData['user_ids']);
 
-		$voted = empty($checkedUserIds) ? false : in_array($userId, $checkedUserIds);
+		$voted = !empty($checkedUserIds) && in_array($userId, $checkedUserIds);
 		$total = $voteSent + $ratingData['total_value'];
 		$votes = $total == 0 ? 0 : $ratingData['total_votes'] + 1;
 
-		if (is_array($checkedUserIds))
-			array_push($checkedUserIds, $userId);
-		else
-			$checkedUserIds = array($userId);
+		$checkedUserIds[] = $userId;
 
 		$users = json_encode($checkedUserIds);
 
 		if (!$voted && ($voteSent >= 1 && $voteSent <= $units) && ($context['user']['id'] == $userId)) {
-			$result = $smcFunc['db_insert']('replace',
+			$smcFunc['db_insert']('replace',
 				'{db_prefix}topic_ratings',
 				array(
 					'id'          => 'int',
@@ -395,8 +357,6 @@ class TopicRatingBar
 
 	/**
 	 * Отображение таблицы с популярными темами
-	 *
-	 * @return void
 	 */
 	public function ratingTop()
 	{
@@ -413,7 +373,7 @@ class TopicRatingBar
 			'url'  => $context['canonical_url']
 		);
 
-		$query = $smcFunc['db_query']('', '
+		$query = $smcFunc['db_query']('', /** @lang text */ '
 			SELECT tr.id, tr.total_votes, tr.total_value, m.subject, b.id_board, b.name, mem.id_member, mem.id_group, mem.real_name, mg.group_name
 			FROM {db_prefix}topic_ratings AS tr
 				LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = tr.id)
@@ -448,11 +408,8 @@ class TopicRatingBar
 
 	/**
 	 * Отображаем панель со звёздочками внутри темы
-	 *
-	 * @param int $unit_width ширина звёздочки
-	 * @return void
 	 */
-	private function showRatingBar(int $unit_width = 25)
+	private function showRatingBar()
 	{
 		global $board_info, $context, $modSettings;
 
@@ -461,16 +418,16 @@ class TopicRatingBar
 
 		$ratingData = $this->getTopicRatingData();
 
-		$rating = ($ratingData['total_votes'] == 0) ? 0 : number_format($ratingData['total_value'] / $ratingData['total_votes'], 0);
+		$rating = ($ratingData['total_votes'] == 0) ? 0 : number_format($ratingData['total_value'] / $ratingData['total_votes']);
 		$users  = $this->getParsedUserIds($ratingData['user_ids']);
-		$voted  = empty($users) ? false : in_array($context['user']['id'], $users);
+		$voted  = !empty($users) && in_array($context['user']['id'], $users);
 
 		$context['rating_bar'] = array(
 			'current'      => $rating,
-			'rating_width' => $rating * $unit_width,
+			'rating_width' => $rating * self::UNIT_WIDTH,
 			'units'        => empty($modSettings['tr_rate_system']) ? 5 : 10,
-			'unit_width'   => $unit_width,
-			'users'        => $ratingData['user_ids'],
+			'unit_width'   => self::UNIT_WIDTH,
+			'users'        => $users,
 			'voted'        => $voted
 		);
 
@@ -486,11 +443,8 @@ class TopicRatingBar
 
 	/**
 	 * Получаем данные о текущих оценках темы
-	 *
-	 * @param int $topic
-	 * @return array
 	 */
-	private function getTopicRatingData(int $topic = 0)
+	private function getTopicRatingData(int $topic = 0): array
 	{
 		global $smcFunc, $context;
 
@@ -521,9 +475,6 @@ class TopicRatingBar
 
 	/**
 	 * Получаем массив с идентификаторами пользователей
-	 *
-	 * @param null|string $data
-	 * @return array
 	 */
 	private function getParsedUserIds(?string $data): array
 	{
