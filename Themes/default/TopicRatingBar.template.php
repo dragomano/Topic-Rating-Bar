@@ -84,8 +84,8 @@ function template_bar_above()
 
 	if (!empty($context['proper_user'])) {
 		echo $header, '
-		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">
-			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px">
 				<span class="item"><span class="fn">', $context['subject'], '</span></span>
 				<span class="rating">
 					<span class="average">', $context['rating_bar']['current'], '</span>
@@ -107,8 +107,8 @@ function template_bar_above()
 		</ul>', $footer;
 	} elseif (!empty($context['rating_bar']['current'])) {
 		echo $header, '
-		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
-			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px;">
+		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px">
 				<span class="item"><span class="fn">', $context['subject'], '</span></span>
 				<span class="rating">
 					<span class="average">', $context['rating_bar']['current'], '</span>
@@ -120,7 +120,7 @@ function template_bar_above()
 		</ul>', $footer;
 	}
 
-	if (!empty($context['proper_user']))
+	if (!empty($context['proper_user']) && empty($context['rating_bar']['voted']))
 		echo '
 	<script>
 		let work = smf_scripturl + "?action=trb_rate";
@@ -129,8 +129,8 @@ function template_bar_above()
 				ajax_indicator(true);
 				let rating = $(this).text();
 				$.post(work, {stars: rating, topic: ', $context['current_topic'], ', user: ', $context['user']['id'], '});
-				$("#unit_ul', $context['current_topic'], '").replaceWith(\'<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px;">\' +
-			\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ', $context['rating_bar']['unit_width'], ') + \'px;">\' +
+				$("#unit_ul', $context['current_topic'], '").replaceWith(\'<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px">\' +
+			\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ', $context['rating_bar']['unit_width'], ') + \'px">\' +
 				\'<span class="item"><span class="fn">', $context['subject'], '</span></span>\' +
 				\'<span class="rating">\' +
 					\'<span class="average">\' + rating + \'</span>\' +
