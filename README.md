@@ -1,12 +1,9 @@
 # Topic Rating Bar
-![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)
+[![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)](https://github.com/SimpleMachines/SMF2.1)
 ![License](https://img.shields.io/github/license/dragomano/topic-rating-bar)
+![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
 
-* **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/topic-rating-bar)
-* **License:** [BSD 3](https://github.com/dragomano/Topic-Rating-Bar/blob/master/LICENSE)
-* **Compatible with:** SMF 2.1.*
-* **Tested on:** PHP 8.0.14 / MariaDB 10.6.5
-* **Hooks only:** Yes
+* **Tested on:** PHP 7.4.28 / MariaDB 10.6.5
 * **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish
 
 ## Description

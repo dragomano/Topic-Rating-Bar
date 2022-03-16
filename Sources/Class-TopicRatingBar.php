@@ -9,19 +9,16 @@
  * @copyright 2011-2022 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.7.1
+ * @version 1.7.3
  */
 
 if (!defined('SMF'))
-	die('Hacking attempt...');
+	die('No direct access...');
 
-class TopicRatingBar
+final class TopicRatingBar
 {
 	public const UNIT_WIDTH = 25;
 
-	/**
-	 * Подключаем используемые хуки
-	 */
 	public function hooks()
 	{
 		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
@@ -35,11 +32,9 @@ class TopicRatingBar
 		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas#', false, __FILE__);
 		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch#', false, __FILE__);
 		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications#', false, __FILE__);
+		add_integration_function('integrate_credits', __CLASS__ . '::credits#', false, __FILE__);
 	}
 
-	/**
-	 * Подключаем языковые строчки мода
-	 */
 	public function loadTheme()
 	{
 		global $context, $modSettings;
@@ -48,16 +43,13 @@ class TopicRatingBar
 
 		$context['trb_ignored_boards'] = [];
 		if (!empty($modSettings['tr_ignored_boards']))
-			$context['trb_ignored_boards'] = explode(",", $modSettings['tr_ignored_boards']);
+			$context['trb_ignored_boards'] = explode(',', $modSettings['tr_ignored_boards']);
 
 		if (!empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 2)
 			clean_cache();
 	}
 
-	/**
-	 * Осуществляем различные проверки и вызываем необходимые функции
-	 */
-	public function menuButtons()
+	public function menuButtons(array $buttons)
 	{
 		global $context;
 
@@ -65,14 +57,14 @@ class TopicRatingBar
 			return;
 
 		// Отображение блока с рейтинговыми темами на главной странице форума
-		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && empty($_REQUEST['action'])) {
+		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && isset($buttons['portal']) ? $context['current_action'] === 'forum' : empty($_REQUEST['action'])) {
 			$this->getBestTopic();
 
 			if (!empty($context['best_topic']))	{
 				loadTemplate('TopicRatingBar');
 
 				// Убедимся, что наш блок будет выше блоков портала
-				if (isset($context['template_layers'][2]) && $context['template_layers'][2] == 'portal') {
+				if (isset($context['template_layers'][2]) && $context['template_layers'][2] === 'portal') {
 					$context['template_layers'][]  = 'portal';
 					$context['template_layers'][2] = 'best_topics';
 				} else
@@ -83,20 +75,12 @@ class TopicRatingBar
 		$this->showRatingBar();
 	}
 
-	/**
-	 * Добавляем свои actions
-	 */
 	public function actions(array &$actionArray)
 	{
-		$actionArray['trb_rate'] = array('Class-TopicRatingBar.php', array($this, 'ratingControl'));
-		$actionArray['rating']   = array('Class-TopicRatingBar.php', array($this, 'ratingTop'));
+		$actionArray['trb_rate'] = array(false, array($this, 'ratingControl'));
+		$actionArray['rating']   = array(false, array($this, 'ratingTop'));
 	}
 
-	/**
-	 * Прячем право на оценку тем для гостей
-	 *
-	 * @hook integrate_load_illegal_guest_permissions
-	 */
 	public function loadIllegalGuestPermissions()
 	{
 		global $context;
@@ -104,19 +88,11 @@ class TopicRatingBar
 		$context['non_guest_permissions'][] = 'rate_topics';
 	}
 
-	/**
-	 * Добавляем разрешение на оценивание тем
-	 *
-	 * @hook integrate_load_permissions
-	 */
 	public function loadPermissions(array &$permissionGroups, array &$permissionList)
 	{
 		$permissionList['membergroup']['rate_topics'] = array(false, 'general', 'view_basic_info');
 	}
 
-	/**
-	 * Удаляем оценки при удалении темы
-	 */
 	public function removeTopics(array $topics)
 	{
 		global $smcFunc;
@@ -133,9 +109,6 @@ class TopicRatingBar
 		);
 	}
 
-	/**
-	 * Добавляем выборку значений рейтинга при просмотре тем внутри разделов
-	 */
 	public function messageIndex(array &$message_index_selects, array &$message_index_tables)
 	{
 		global $modSettings;
@@ -147,9 +120,6 @@ class TopicRatingBar
 		$message_index_tables[]  = 'LEFT JOIN {db_prefix}topic_ratings AS tr ON (tr.id = t.id_topic)';
 	}
 
-	/**
-	 * Заводим секцию для настроек мода в админке
-	 */
 	public function adminAreas(array &$admin_areas)
 	{
 		global $txt;
@@ -157,25 +127,26 @@ class TopicRatingBar
 		$admin_areas['config']['areas']['modsettings']['subsections']['topic_rating'] = array($txt['tr_title']);
 	}
 
-	/**
-	 * Легкий доступ к настройкам мода через быстрый поиск в админке
-	 */
 	public function adminSearch(array &$language_files, array &$include_files, array &$settings_search)
 	{
 		$settings_search[] = array(array($this, 'settings'), 'area=modsettings;sa=topic_rating');
 	}
 
-	/**
-	 * Подключаем функцию с настройками мода
-	 */
 	public function modifyModifications(array &$subActions)
 	{
 		$subActions['topic_rating'] = array($this, 'settings');
 	}
 
+	public function credits()
+	{
+		global $context;
+
+		$link = $context['user']['language'] === 'russian' ? 'https://dragomano.ru/mods/topic-rating-bar' : 'https://custom.simplemachines.org/mods/index.php?mod=3236';
+
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Topic Rating Bar</a> &copy; 2011&ndash;2022, Bugo';
+	}
+
 	/**
-	 * Настройки мода
-	 *
 	 * @return void|array
 	*/
 	public function settings(bool $return_config = false)
@@ -186,7 +157,7 @@ class TopicRatingBar
 		$context['settings_title'] = $txt['settings'];
 
 		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
-		$context[$context['admin_menu_name']]['tab_data']['tabs']['topic_rating'] = array('description' => $txt['tr_desc']);
+		$context[$context['admin_menu_name']]['tab_data']['description'] = $txt['tr_desc'];
 
 		if (!isset($modSettings['tr_count_topics']))
 			updateSettings(array('tr_count_topics' => 30));
@@ -220,10 +191,7 @@ class TopicRatingBar
 		prepareDBSettingContext($config_vars);
 	}
 
-	/**
-	 * Получаем самую популярную тему форума
-	 */
-	public function getBestTopic()
+	public static function getBestTopic()
 	{
 		global $modSettings, $smcFunc, $context, $scripturl, $txt;
 
@@ -356,7 +324,7 @@ class TopicRatingBar
 	}
 
 	/**
-	 * Отображение таблицы с популярными темами
+	 * Подготовка данных для таблицы с популярными темами
 	 */
 	public function ratingTop()
 	{

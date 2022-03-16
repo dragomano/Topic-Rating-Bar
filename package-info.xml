@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:TopicRatingBar</id>
 	<name>Topic Rating Bar</name>
-	<version>1.7.2</version>
+	<version>1.7.3</version>
 	<type>modification</type>
 
 	<install for="2.1.*">
@@ -24,7 +24,6 @@
 		<remove-file name="$sourcedir/Class-TopicRatingBar.php" />
 		<remove-dir name="$languagedir/TopicRatingBar" />
 		<remove-dir name="$themedir/images/trb" />
-		<redirect url="?action=admin;area=packages;sa=browse" timeout="1000" />
 	</uninstall>
 
 </package-info>
