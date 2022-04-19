@@ -4,7 +4,7 @@
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
 
 * **Tested on:** PHP 7.4.28 / MariaDB 10.6.5
-* **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish
+* **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish, Romanian
 
 ## Description
 * Simple rating bar for topics (5 or 10 stars).
