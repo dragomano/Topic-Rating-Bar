@@ -9,6 +9,7 @@
 	<install for="2.1.*">
 		<readme parsebbc="true" lang="russian" type="file">readme/russian.txt</readme>
 		<readme parsebbc="true" lang="english" type="file">readme/english.txt</readme>
+		<readme parsebbc="true" lang="romanian" type="file">readme/romanian.txt</readme>
 		<hook hook="integrate_pre_load" function="TopicRatingBar::hooks#" file="$sourcedir/Class-TopicRatingBar.php" />
 		<require-dir name="Themes" destination="$boarddir" />
 		<require-dir name="Sources" destination="$boarddir" />
