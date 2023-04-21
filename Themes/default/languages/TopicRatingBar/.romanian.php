@@ -1,10 +1,12 @@
 <?php
+
 /**
- * .romanian.php file translated on https://crowdin.com/project/smf-21-mods
+ * .romanian.php
  *
  * @package Topic Rating Bar
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
  */
+
 $txt['tr_title']        = 'Bară evaluare subiect';
 $txt['tr_rating']       = 'Evaluare subiect:';
 $txt['tr_top_stat']     = 'Statistici comune privind popularitatea';
