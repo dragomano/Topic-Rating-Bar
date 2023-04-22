@@ -7,8 +7,7 @@ function template_rating()
 	echo '
 	<div class="cat_bar">
 		<h3 class="catbg">
-			<img alt="*" class="icon" width="16" src="', $settings['default_images_url'], '/trb/statistics.png">
-			', $txt['tr_top_topics'], '
+			<i class="main_icons general"></i> ', $txt['tr_top_topics'], '
 		</h3>
 	</div>';
 
@@ -50,16 +49,13 @@ function template_rating()
 			$(".table_grid").tablesorter();
 		});
 	</script>';
-	}
-	else
+	} else {
 		echo '
 	<p class="information">', $txt['tr_top_empty'], '</p>';
-
-	$link = $context['user']['language'] === 'russian' ? 'https://dragomano.ru/mods/topic-rating-bar' : 'https://custom.simplemachines.org/mods/index.php?mod=3236';
+	}
 
 	echo '
-	<br class="clear">
-	<div class="smalltext centertext"><a href="' . $link . '" target="_blank" rel="noopener">Topic Rating Bar</a></div>';
+	<br class="clear">';
 }
 
 function template_bar_above()
@@ -169,7 +165,7 @@ function template_best_topics_above()
 					<p class="floatright"><a href="', $scripturl, '?action=rating">', $txt['tr_other_topics'], '</a></p>
 				</div>
 				<div class="board_stats">
-					<p>', $txt['posts'], ': ', $context['best_topic']['replies'], '<br>', $txt['tr_votes'], ': ', $context['best_topic']['votes'], '</p>
+					<p>', $txt['replies'], ': ', $context['best_topic']['replies'], '<br>', $txt['tr_votes'], ': ', $context['best_topic']['votes'], '</p>
 				</div>
 				<div class="lastpost lpr_border">
 					<p><strong>', $txt['last_post'], ':</strong> ', $context['best_topic']['time'], '<br>
