@@ -1,0 +1,5 @@
+[center][color=red][size=16pt][b]Bară de evaluare subiecte[/b][/size][/color]
+[color=blue][b][size=10pt]By Bugo[/size][/b][/color]
+
+[color=green]Bară simplă de evaluare pentru subiecte.[/color]
+Folosește steluțele și aspectul din [url=https://vbsupport.org/forum/showthread.php?t=30193]AJAX Threads Rating[/url] (vBulletin mod).[/center][hr]Această lucrare este licențiată sub Licența [url=https://github.com/dragomano/Topic-Rating-Bar/blob/master/LICENSE]BSD 3-Clause[/url]
