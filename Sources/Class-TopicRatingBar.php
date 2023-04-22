@@ -6,10 +6,10 @@
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2011-2022 Bugo
+ * @copyright 2011-2023 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.7.3
+ * @version 1.7.4
  */
 
 if (!defined('SMF'))
@@ -155,9 +155,7 @@ final class TopicRatingBar
 
 		$context['page_title']     = $txt['tr_title'];
 		$context['settings_title'] = $txt['settings'];
-
 		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
-		$context[$context['admin_menu_name']]['tab_data']['description'] = $txt['tr_desc'];
 
 		if (!isset($modSettings['tr_count_topics']))
 			updateSettings(array('tr_count_topics' => 30));
@@ -176,6 +174,8 @@ final class TopicRatingBar
 
 		if ($return_config)
 			return $config_vars;
+
+		$context[$context['admin_menu_name']]['tab_data']['description'] = $txt['tr_desc'];
 
 		// Saving?
 		if (isset($_GET['save'])) {

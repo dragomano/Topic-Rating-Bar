@@ -11,28 +11,28 @@ if ((SMF == 'SSI') && !$user_info['is_admin'])
 $tables[] = array(
 	'name' => 'topic_ratings',
 	'columns' => array(
-		0 => array(
+		array(
 			'name'     => 'id',
 			'type'     => 'mediumint',
 			'size'     => 8,
 			'unsigned' => true,
 			'null'     => false
 		),
-		1 => array(
+		array(
 			'name'    => 'total_votes',
 			'type'    => 'mediumint',
 			'size'    => 8,
 			'null'    => false,
 			'default' => 0
 		),
-		2 => array(
+		array(
 			'name'    => 'total_value',
 			'type'    => 'mediumint',
 			'size'    => 8,
 			'null'    => false,
 			'default' => 0
 		),
-		3 => array(
+		array(
 			'name' => 'user_ids',
 			'type' => 'longtext',
 			'null' => false
