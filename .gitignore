@@ -1,1 +1,6 @@
-.idea/
+**/.idea/
+**/.vscode/
+**/vendor/
+Themes/default/languages/TopicRatingBar/*
+!Themes/default/languages/TopicRatingBar/index.php
+!Themes/default/languages/TopicRatingBar/.english.php
