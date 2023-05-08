@@ -60,7 +60,7 @@ function template_rating()
 
 function template_bar_above()
 {
-	global $modSettings, $txt, $scripturl, $settings, $context;
+	global $modSettings, $txt, $scripturl, $context;
 
 	$rates = explode("|", empty($modSettings['tr_rate_system']) ? $txt['tr_rates'] : $txt['tr_rates_10']);
 
@@ -71,8 +71,8 @@ function template_bar_above()
 
 	$header = '
 	<div class="roundframe topic_rating_div">
-		<a href="' . $scripturl . '?action=rating">
-			<img class="icon" alt="" title="' . $txt['tr_top_stat'] . '" src="' . $settings['default_images_url'] . '/trb/statistics.png">
+		<a href="' . $scripturl . '?action=rating" title="' . $txt['tr_top_stat'] . '">
+			<i class="main_icons general"></i>
 		</a>';
 
 	$footer = '
