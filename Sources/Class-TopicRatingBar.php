@@ -9,7 +9,7 @@
  * @copyright 2011-2023 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.7.4
+ * @version 1.7.6
  */
 
 if (!defined('SMF'))
@@ -22,7 +22,8 @@ final class TopicRatingBar
 	public function hooks()
 	{
 		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
-		add_integration_function('integrate_menu_buttons', __CLASS__ . '::menuButtons#', false, __FILE__);
+		add_integration_function('integrate_menu_buttons', __CLASS__ . '::showBestTopic#', false, __FILE__);
+		add_integration_function('integrate_menu_buttons', __CLASS__ . '::showRatingBar#', false, __FILE__);
 		add_integration_function('integrate_actions', __CLASS__ . '::actions#', false, __FILE__);
 		add_integration_function('integrate_load_illegal_guest_permissions', __CLASS__ . '::loadIllegalGuestPermissions#', false, __FILE__);
 		add_integration_function('integrate_load_permissions', __CLASS__ . '::loadPermissions#', false, __FILE__);
@@ -47,32 +48,6 @@ final class TopicRatingBar
 
 		if (!empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 2)
 			clean_cache();
-	}
-
-	public function menuButtons(array $buttons)
-	{
-		global $context;
-
-		if (!empty($context['current_board']) && !empty($context['trb_ignored_boards']) && in_array($context['current_board'], $context['trb_ignored_boards']))
-			return;
-
-		// Отображение блока с рейтинговыми темами на главной странице форума
-		if (empty($_REQUEST['board']) && empty($_REQUEST['topic']) && isset($buttons['portal']) ? $context['current_action'] === 'forum' : empty($_REQUEST['action'])) {
-			$this->getBestTopic();
-
-			if (!empty($context['best_topic']))	{
-				loadTemplate('TopicRatingBar');
-
-				// Убедимся, что наш блок будет выше блоков портала
-				if (isset($context['template_layers'][2]) && $context['template_layers'][2] === 'portal') {
-					$context['template_layers'][]  = 'portal';
-					$context['template_layers'][2] = 'best_topics';
-				} else
-					$context['template_layers'][] = 'best_topics';
-			}
-		}
-
-		$this->showRatingBar();
 	}
 
 	public function actions(array &$actionArray)
@@ -143,12 +118,9 @@ final class TopicRatingBar
 
 		$link = $context['user']['language'] === 'russian' ? 'https://dragomano.ru/mods/topic-rating-bar' : 'https://custom.simplemachines.org/mods/index.php?mod=3236';
 
-		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Topic Rating Bar</a> &copy; 2011&ndash;2022, Bugo';
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Topic Rating Bar</a> &copy; 2011&ndash;2023, Bugo';
 	}
 
-	/**
-	 * @return void|array
-	*/
 	public function settings(bool $return_config = false)
 	{
 		global $context, $txt, $scripturl, $modSettings;
@@ -191,12 +163,17 @@ final class TopicRatingBar
 		prepareDBSettingContext($config_vars);
 	}
 
-	public static function getBestTopic()
+	/**
+	 * @deprecated
+	 */
+	public static function getBestTopic(): void
 	{
-		global $modSettings, $smcFunc, $context, $scripturl, $txt;
+		self::prepareBestTopic();
+	}
 
-		if (empty($modSettings['tr_show_best_topic']))
-			return;
+	public static function prepareBestTopic(): void
+	{
+		global $smcFunc, $context, $scripturl, $txt;
 
 		$query = $smcFunc['db_query']('', /** @lang text */ '
 			SELECT
@@ -375,11 +352,40 @@ final class TopicRatingBar
 	}
 
 	/**
+	 * Отображение блока с рейтинговыми темами на главной странице форума
+	 */
+	public function showBestTopic(array $buttons)
+	{
+		global $modSettings, $context;
+
+		if (empty($modSettings['tr_show_best_topic']))
+			return;
+
+		if (isset($buttons['portal']) ? $context['current_action'] === 'forum' : empty($_REQUEST['action'])) {
+			$this->prepareBestTopic();
+
+			if (!empty($context['best_topic']))	{
+				loadTemplate('TopicRatingBar');
+
+				// Убедимся, что наш блок будет выше блоков портала
+				if (isset($context['template_layers'][2]) && $context['template_layers'][2] === 'portal') {
+					$context['template_layers'][]  = 'portal';
+					$context['template_layers'][2] = 'best_topics';
+				} else
+					$context['template_layers'][] = 'best_topics';
+			}
+		}
+	}
+
+	/**
 	 * Отображаем панель со звёздочками внутри темы
 	 */
-	private function showRatingBar()
+	public function showRatingBar()
 	{
-		global $board_info, $context, $modSettings;
+		global $context, $board_info, $modSettings;
+
+		if (!empty($context['current_board']) && !empty($context['trb_ignored_boards']) && in_array($context['current_board'], $context['trb_ignored_boards']))
+			return;
 
 		if (!empty($board_info['error']) || empty($context['current_topic']) || empty($context['topicinfo']['id_member_started']))
 			return;

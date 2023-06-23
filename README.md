@@ -5,7 +5,7 @@
 [![Crowdin](https://badges.crowdin.net/topic-rating-bar/localized.svg)](https://crowdin.com/project/topic-rating-bar)
 
 * **Tested on:** PHP 8.0.24 / MariaDB 10.6.7
-* **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish, Romanian
+* **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish, Romanian, Greek
 
 ## Description
 * Simple rating bar for topics (5 or 10 stars).
