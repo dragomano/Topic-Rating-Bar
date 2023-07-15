@@ -127,7 +127,7 @@ function template_bar_above()
 				$.post(work, {stars: rating, topic: ', $context['current_topic'], ', user: ', $context['user']['id'], '});
 				$("#unit_ul', $context['current_topic'], '").replaceWith(\'<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px">\' +
 			\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ', $context['rating_bar']['unit_width'], ') + \'px">\' +
-				\'<span class="item"><span class="fn">', $context['subject'], '</span></span>\' +
+				\'<span class="item"><span class="fn">', htmlspecialchars($context['subject']), '</span></span>\' +
 				\'<span class="rating">\' +
 					\'<span class="average">\' + rating + \'</span>\' +
 				\'</span>\' +
