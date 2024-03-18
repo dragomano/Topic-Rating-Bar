@@ -1,8 +1,8 @@
 <?php
 
-function template_rating()
+function template_rating(): void
 {
-	global $settings, $txt, $context;
+	global $txt, $context;
 
 	echo '
 	<div class="cat_bar">
@@ -39,15 +39,14 @@ function template_rating()
 					<td>', $data['votes'], '</td>
 				</tr>';
 		}
-		echo '
+		echo /** @lang text */ '
 			</tbody>
 		</table>
 	</div>
-	<script src="', $settings['default_theme_url'], '/scripts/jquery.tablesorter.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/tablesort@5/tablesort.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/tablesort@5/src/tablesort.min.js"></script>
 	<script>
-		jQuery(document).ready(function($) {
-			$(".table_grid").tablesorter();
-		});
+		new Tablesort(document.querySelector(".table_grid"));
 	</script>';
 	} else {
 		echo '
@@ -58,7 +57,7 @@ function template_rating()
 	<br class="clear">';
 }
 
-function template_bar_above()
+function template_bar_above(): void
 {
 	global $modSettings, $txt, $scripturl, $context;
 
@@ -117,25 +116,32 @@ function template_bar_above()
 	}
 
 	if (!empty($context['proper_user']) && empty($context['rating_bar']['voted']))
-		echo '
+		echo /** @lang text */ '
 	<script>
 		let work = smf_scripturl + "?action=trb_rate";
-		jQuery(document).ready(function($) {
-			$("#unit_ul', $context['current_topic'], ' li > span").on("click", function() {
-				ajax_indicator(true);
-				let rating = $(this).text();
-				$.post(work, {stars: rating, topic: ', $context['current_topic'], ', user: ', $context['user']['id'], '});
-				$("#unit_ul', $context['current_topic'], '").replaceWith(\'<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px">\' +
-			\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ', $context['rating_bar']['unit_width'], ') + \'px">\' +
-				\'<span class="item"><span class="fn">', htmlspecialchars($context['subject']), '</span></span>\' +
-				\'<span class="rating">\' +
-					\'<span class="average">\' + rating + \'</span>\' +
-				\'</span>\' +
-				\'<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>\' +
-			\'</li></ul>\').blur();
-				setTimeout(function() {
-					ajax_indicator(false);
-				}, 500);
+		document.addEventListener("DOMContentLoaded", function() {
+			let elements = document.querySelectorAll("#unit_ul' . $context['current_topic'] . ' li > span");
+			elements.forEach(function(element) {
+				element.addEventListener("click", function() {
+					ajax_indicator(true);
+					let rating = this.textContent;
+					let xhr = new XMLHttpRequest();
+					xhr.open("POST", work, true);
+					xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+					xhr.send("stars=" + rating + "&topic=' . $context['current_topic'] . '&user=' . $context['user']['id'] . '");
+					xhr.onload = function() {
+						let unitUl = document.getElementById("unit_ul' . $context['current_topic'] . '");
+						unitUl.innerHTML = \'<ul id="unit_ul' . $context['current_topic'] . '" class="unit-rating" style="width:' . $context['rating_bar']['unit_width'] * $context['rating_bar']['units'] . 'px">\' +
+							\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ' . $context['rating_bar']['unit_width'] . ') + \'px">\' +
+							\'<span class="item"><span class="fn">' . htmlspecialchars($context['subject']) . '</span></span>\' +
+							\'<span class="rating">\' +
+							\'<span class="average">\' + rating + \'</span>\' +
+							\'</span>\' +
+							\'<span class="votes">' . (is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0) . '</span>\' +
+							\'</li></ul>\';
+						ajax_indicator(false);
+					};
+				});
 			});
 		});
 	</script>';
@@ -145,7 +151,7 @@ function template_bar_below()
 {
 }
 
-function template_best_topics_above()
+function template_best_topics_above(): void
 {
 	global $txt, $settings, $context, $scripturl;
 
