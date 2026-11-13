@@ -1,18 +1,14 @@
 <?php
 
 /**
- * Class-TopicRatingBar.php
- *
  * @package Topic Rating Bar
  * @link https://custom.simplemachines.org/mods/index.php?mod=3236
  * @author Bugo https://dragomano.ru/mods/topic-rating-bar
- * @copyright 2011-2024 Bugo
+ * @copyright 2011-2026 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
- *
- * @version 1.8
  */
 
-if (!defined('SMF'))
+if (! defined('SMF'))
 	die('No direct access...');
 
 final class TopicRatingBar
@@ -21,19 +17,19 @@ final class TopicRatingBar
 
 	public function hooks(): void
 	{
-		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
-		add_integration_function('integrate_menu_buttons', __CLASS__ . '::showBestTopic#', false, __FILE__);
-		add_integration_function('integrate_menu_buttons', __CLASS__ . '::showRatingBar#', false, __FILE__);
-		add_integration_function('integrate_actions', __CLASS__ . '::actions#', false, __FILE__);
-		add_integration_function('integrate_load_illegal_guest_permissions', __CLASS__ . '::loadIllegalGuestPermissions#', false, __FILE__);
-		add_integration_function('integrate_load_permissions', __CLASS__ . '::loadPermissions#', false, __FILE__);
-		add_integration_function('integrate_remove_topics', __CLASS__ . '::removeTopics#', false, __FILE__);
-		add_integration_function('integrate_message_index', __CLASS__ . '::messageIndex#', false, __FILE__);
-		add_integration_function('integrate_messageindex_buttons', __CLASS__ . '::showRatingOnMessageIndex#', false, __FILE__);
-		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas#', false, __FILE__);
-		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch#', false, __FILE__);
-		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications#', false, __FILE__);
-		add_integration_function('integrate_credits', __CLASS__ . '::credits#', false, __FILE__);
+		add_integration_function('integrate_load_theme', self::class . '::loadTheme#', false);
+		add_integration_function('integrate_menu_buttons', self::class . '::showBestTopic#', false);
+		add_integration_function('integrate_menu_buttons', self::class . '::showRatingBar#', false);
+		add_integration_function('integrate_actions', self::class . '::actions#', false);
+		add_integration_function('integrate_load_illegal_guest_permissions', self::class . '::loadIllegalGuestPermissions#', false);
+		add_integration_function('integrate_load_permissions', self::class . '::loadPermissions#', false);
+		add_integration_function('integrate_remove_topics', self::class . '::removeTopics#', false);
+		add_integration_function('integrate_message_index', self::class . '::messageIndex#', false);
+		add_integration_function('integrate_messageindex_buttons', self::class . '::showRatingOnMessageIndex#', false);
+		add_integration_function('integrate_admin_areas', self::class . '::adminAreas#', false);
+		add_integration_function('integrate_admin_search', self::class . '::adminSearch#', false);
+		add_integration_function('integrate_modify_modifications', self::class . '::modifyModifications#', false);
+		add_integration_function('integrate_credits', self::class . '::credits#', false);
 	}
 
 	public function loadTheme(): void
@@ -43,11 +39,13 @@ final class TopicRatingBar
 		loadLanguage('TopicRatingBar/');
 
 		$context['trb_ignored_boards'] = [];
-		if (!empty($modSettings['tr_ignored_boards']))
+		if (! empty($modSettings['tr_ignored_boards'])) {
 			$context['trb_ignored_boards'] = explode(',', $modSettings['tr_ignored_boards']);
+		}
 
-		if (!empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 2)
+		if (! empty($modSettings['cache_enable']) && $modSettings['cache_enable'] >= 2) {
 			clean_cache();
+		}
 	}
 
 	public function actions(array &$actionArray): void
@@ -79,8 +77,8 @@ final class TopicRatingBar
 			DELETE FROM {db_prefix}topic_ratings
 			WHERE id IN ({array_int:topics})',
 			[
-				'topics' => $topics
-			]
+				'topics' => $topics,
+			],
 		);
 	}
 
@@ -118,7 +116,7 @@ final class TopicRatingBar
 
 		$link = $txt['lang_dictionary'] === 'ru' ? 'https://dragomano.ru/mods/topic-rating-bar' : 'https://custom.simplemachines.org/mods/index.php?mod=3236';
 
-		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Topic Rating Bar</a> &copy; 2011&ndash;2024, Bugo';
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Topic Rating Bar</a> &copy; 2011&ndash;' . date('Y') . ', Bugo';
 	}
 
 	/**
@@ -131,10 +129,11 @@ final class TopicRatingBar
 
 		$context['page_title']     = $txt['tr_title'];
 		$context['settings_title'] = $txt['settings'];
-		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
+		$context['post_url']       = $scripturl . '?action=admin;area=modsettings;save;sa=topic_rating';
 
-		if (!isset($modSettings['tr_count_topics']))
+		if (! isset($modSettings['tr_count_topics'])) {
 			updateSettings(['tr_count_topics' => 30]);
+		}
 
 		$txt['tr_count_topics'] = sprintf($txt['tr_count_topics'], $scripturl);
 
@@ -145,11 +144,12 @@ final class TopicRatingBar
 			['int', 'tr_count_topics'],
 			['boards', 'tr_ignored_boards'],
 			['title', 'edit_permissions'],
-			['permissions', 'rate_topics']
+			['permissions', 'rate_topics'],
 		];
 
-		if ($return_config)
+		if ($return_config) {
 			return $config_vars;
+		}
 
 		$context[$context['admin_menu_name']]['tab_data']['description'] = $txt['tr_desc'];
 
@@ -196,8 +196,8 @@ final class TopicRatingBar
 			ORDER BY tr.total_value DESC
 			LIMIT 1',
 			[
-				'ignore_boards' => $context['trb_ignored_boards']
-			]
+				'ignore_boards' => $context['trb_ignored_boards'],
+			],
 		);
 
 		$context['best_topic'] = [];
@@ -212,7 +212,7 @@ final class TopicRatingBar
 				'time'      => $row['poster_time'] > 0 ? timeformat($row['poster_time']) : $txt['not_applicable'],
 				'last_post' => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.msg' . $row['id_last_msg'] . '#new" title="' . $row['last'] . '">' . $lastPost . '</a>',
 				'member'    => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
-				'votes'     => $row['total_votes']
+				'votes'     => $row['total_votes'],
 			];
 		}
 
@@ -270,11 +270,10 @@ final class TopicRatingBar
 		if (empty($voteSent) || empty($topic) || empty($userId))
 			exit;
 
-		$ratingData = $this->getTopicRatingData($topic);
-
+		$ratingData     = $this->getTopicRatingData($topic);
 		$checkedUserIds = $this->getParsedUserIds($ratingData['user_ids']);
 
-		$voted = !empty($checkedUserIds) && in_array($userId, $checkedUserIds);
+		$voted = ! empty($checkedUserIds) && in_array($userId, $checkedUserIds);
 		$total = $voteSent + $ratingData['total_value'];
 		$votes = $total == 0 ? 0 : $ratingData['total_votes'] + 1;
 
@@ -282,22 +281,22 @@ final class TopicRatingBar
 
 		$users = json_encode($checkedUserIds);
 
-		if (!$voted && ($voteSent >= 1 && $voteSent <= $units) && ($context['user']['id'] == $userId)) {
+		if (! $voted && ($voteSent >= 1 && $voteSent <= $units) && ($context['user']['id'] == $userId)) {
 			$smcFunc['db_insert']('replace',
 				'{db_prefix}topic_ratings',
 				[
 					'id'          => 'int',
 					'total_votes' => 'int',
 					'total_value' => 'int',
-					'user_ids'    => 'string'
+					'user_ids'    => 'string',
 				],
 				[
 					$topic,
 					$votes,
 					$total,
-					$users
+					$users,
 				],
-				['id']
+				['id'],
 			);
 		}
 
@@ -319,7 +318,7 @@ final class TopicRatingBar
 
 		$context['linktree'][] = [
 			'name' => $context['page_title'],
-			'url'  => $context['canonical_url']
+			'url'  => $context['canonical_url'],
 		];
 
 		$query = $smcFunc['db_query']('', /** @lang text */ '
@@ -337,8 +336,8 @@ final class TopicRatingBar
 			LIMIT {int:limit}',
 			[
 				'ignore_boards' => $context['trb_ignored_boards'],
-				'limit'         => empty($modSettings['tr_count_topics']) ? 0 : (int) $modSettings['tr_count_topics']
-			]
+				'limit'         => empty($modSettings['tr_count_topics']) ? 0 : (int) $modSettings['tr_count_topics'],
+			],
 		);
 
 		$context['top_rating'] = [];
@@ -349,7 +348,7 @@ final class TopicRatingBar
 				'author' => '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
 				'group'  => empty($row['id_group']) ? $txt['tr_regular_members'] : $row['group_name'],
 				'rating' => number_format($row['total_value'] / $row['total_votes'], 2),
-				'votes'  => $row['total_votes']
+				'votes'  => $row['total_votes'],
 			];
 
 		$smcFunc['db_free_result']($query);
@@ -368,15 +367,16 @@ final class TopicRatingBar
 		if (isset($buttons['portal']) ? $context['current_action'] === 'forum' : empty($_REQUEST['action'])) {
 			$this->prepareBestTopic();
 
-			if (!empty($context['best_topic']))	{
+			if (! empty($context['best_topic']))	{
 				loadTemplate('TopicRatingBar');
 
 				// Убедимся, что наш блок будет выше блоков портала
 				if (isset($context['template_layers'][2]) && $context['template_layers'][2] === 'portal') {
 					$context['template_layers'][]  = 'portal';
 					$context['template_layers'][2] = 'best_topics';
-				} else
+				} else {
 					$context['template_layers'][] = 'best_topics';
+				}
 			}
 		}
 	}
@@ -388,17 +388,17 @@ final class TopicRatingBar
 	{
 		global $context, $board_info, $modSettings;
 
-		if (!empty($context['current_board']) && !empty($context['trb_ignored_boards']) && in_array($context['current_board'], $context['trb_ignored_boards']))
+		if (! empty($context['current_board']) && ! empty($context['trb_ignored_boards']) && in_array($context['current_board'], $context['trb_ignored_boards']))
 			return;
 
-		if (!empty($board_info['error']) || empty($context['current_topic']) || empty($context['topicinfo']['id_member_started']))
+		if (! empty($board_info['error']) || empty($context['current_topic']) || empty($context['topicinfo']['id_member_started']))
 			return;
 
 		$ratingData = $this->getTopicRatingData();
 
 		$rating = ($ratingData['total_votes'] == 0) ? 0 : number_format($ratingData['total_value'] / $ratingData['total_votes']);
 		$users  = $this->getParsedUserIds($ratingData['user_ids']);
-		$voted  = !empty($users) && in_array($context['user']['id'], $users);
+		$voted  = ! empty($users) && in_array($context['user']['id'], $users);
 
 		$context['rating_bar'] = [
 			'current'      => $rating,
@@ -406,7 +406,7 @@ final class TopicRatingBar
 			'units'        => empty($modSettings['tr_rate_system']) ? 5 : 10,
 			'unit_width'   => self::UNIT_WIDTH,
 			'users'        => $users,
-			'voted'        => $voted
+			'voted'        => $voted,
 		];
 
 		if (empty($context['rating_bar']) || empty($context['subject']))
@@ -432,8 +432,8 @@ final class TopicRatingBar
 			WHERE id = {int:topic_id}
 			LIMIT 1',
 			[
-				'topic_id' => $topic ?: $context['current_topic']
-			]
+				'topic_id' => $topic ?: $context['current_topic'],
+			],
 		);
 
 		$result = $smcFunc['db_fetch_assoc']($query);
@@ -444,7 +444,7 @@ final class TopicRatingBar
 			$result = [
 				'total_votes' => 0,
 				'total_value' => 0,
-				'user_ids'    => ''
+				'user_ids'    => '',
 			];
 		}
 
@@ -456,8 +456,9 @@ final class TopicRatingBar
 	 */
 	private function getParsedUserIds(?string $data): array
 	{
-		if (empty($data))
+		if (empty($data)) {
 			return [];
+		}
 
 		return is_array($result = json_decode($data, true)) ? $result : unserialize($data);
 	}

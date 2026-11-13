@@ -11,7 +11,7 @@ function template_rating(): void
 		</h3>
 	</div>';
 
-	if (!empty($context['top_rating']))	{
+	if (! empty($context['top_rating']))	{
 		echo '
 	<p class="information">', $txt['tr_top_desc'], '</p>
 	<div class="tborder topic_table centertext">
@@ -77,7 +77,7 @@ function template_bar_above(): void
 	$footer = '
 	</div>';
 
-	if (!empty($context['proper_user'])) {
+	if (! empty($context['proper_user'])) {
 		echo $header, '
 		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
 			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px">
@@ -100,7 +100,7 @@ function template_bar_above(): void
 
 		echo '
 		</ul>', $footer;
-	} elseif (!empty($context['rating_bar']['current'])) {
+	} elseif (! empty($context['rating_bar']['current'])) {
 		echo $header, '
 		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
 			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px">
@@ -115,7 +115,7 @@ function template_bar_above(): void
 		</ul>', $footer;
 	}
 
-	if (!empty($context['proper_user']) && empty($context['rating_bar']['voted']))
+	if (! empty($context['proper_user']) && empty($context['rating_bar']['voted']))
 		echo /** @lang text */ '
 	<script>
 		let work = smf_scripturl + "?action=trb_rate";
@@ -182,6 +182,4 @@ function template_best_topics_above(): void
 	</div>';
 }
 
-function template_best_topics_below()
-{
-}
+function template_best_topics_below() {}

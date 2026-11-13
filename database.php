@@ -1,62 +1,69 @@
 <?php
 
-if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
+global $user_info, $smcFunc;
+
+if (file_exists(dirname(__FILE__) . '/SSI.php') && ! defined('SMF')) {
 	require_once(dirname(__FILE__) . '/SSI.php');
-elseif(!defined('SMF'))
+} elseif(! defined('SMF')) {
 	die('<b>Error:</b> Cannot install - please verify that you put this file in the same place as SMF\'s index.php and SSI.php files.');
+}
 
-if ((SMF == 'SSI') && !$user_info['is_admin'])
+if ((SMF == 'SSI') && ! $user_info['is_admin']) {
 	die('Admin privileges required.');
+}
 
-$tables[] = array(
-	'name' => 'topic_ratings',
-	'columns' => array(
-		array(
+$tables[] = [
+	'name'    => 'topic_ratings',
+	'columns' => [
+		[
 			'name'     => 'id',
 			'type'     => 'mediumint',
 			'size'     => 8,
 			'unsigned' => true,
-			'null'     => false
-		),
-		array(
+			'null'     => false,
+		],
+		[
 			'name'    => 'total_votes',
 			'type'    => 'mediumint',
 			'size'    => 8,
 			'null'    => false,
-			'default' => 0
-		),
-		array(
+			'default' => 0,
+		],
+		[
 			'name'    => 'total_value',
 			'type'    => 'mediumint',
 			'size'    => 8,
 			'null'    => false,
-			'default' => 0
-		),
-		array(
+			'default' => 0,
+		],
+		[
 			'name' => 'user_ids',
 			'type' => 'longtext',
-			'null' => false
-		)
-	),
-	'indexes' => array(
-		array(
+			'null' => false,
+		],
+	],
+	'indexes' => [
+		[
 			'type'    => 'unique',
-			'columns' => array('id')
-		),
-		array(
-			'type' => 'index',
-			'columns' => array('total_votes', 'total_value')
-		)
-	)
-);
+			'columns' => ['id'],
+		],
+		[
+			'type'    => 'index',
+			'columns' => ['total_votes', 'total_value'],
+		],
+	],
+];
 
 db_extend('packages');
 
 foreach($tables as $table) {
-	$smcFunc['db_create_table']('{db_prefix}' . $table['name'], $table['columns'], $table['indexes'], array(), 'update');
-	if (isset($table['default']))
+	$smcFunc['db_create_table']('{db_prefix}' . $table['name'], $table['columns'], $table['indexes'], [], 'update');
+
+	if (isset($table['default'])) {
 		$smcFunc['db_insert']('ignore', '{db_prefix}' . $table['name'], $table['default']['columns'], $table['default']['values'], $table['default']['keys']);
+	}
 }
 
-if (SMF == 'SSI')
+if (SMF == 'SSI') {
 	echo 'Database changes are complete! Please wait...';
+}
