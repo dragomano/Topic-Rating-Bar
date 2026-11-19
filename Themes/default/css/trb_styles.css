@@ -14,7 +14,8 @@
 	margin: 0;
 	float: left;
 }
-.unit-rating li span {
+.unit-rating li span,
+.unit-rating li button {
 	outline: none;
 	display: block;
 	width: 25px;
@@ -25,32 +26,47 @@
 	position: absolute;
 	padding: 0;
 }
-.unit-rating li span.rater:hover {
+/* Star buttons behave like regular span stars */
+.unit-rating li button {
+	border: 0;
+	margin: 0;
+	background: transparent;
+	color: transparent;
+	font-size: 0;
+	overflow: hidden;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+	border-radius: 0;
+	box-shadow: none;
+}
+.unit-rating li span.rater:hover,
+.unit-rating li button.rater:hover {
 	background: url(../images/trb/all_stars.png) left center;
 	z-index: 2;
 	left: 0;
 	cursor: pointer;
 }
-.unit-rating span.r1-unit{left:0}
-.unit-rating span.r1-unit:hover{width:25px}
-.unit-rating span.r2-unit{left:25px}
-.unit-rating span.r2-unit:hover{width:50px}
-.unit-rating span.r3-unit{left:50px}
-.unit-rating span.r3-unit:hover{width:75px}
-.unit-rating span.r4-unit{left:75px}
-.unit-rating span.r4-unit:hover{width:100px}
-.unit-rating span.r5-unit{left:100px}
-.unit-rating span.r5-unit:hover{width:125px}
-.unit-rating span.r6-unit{left:125px}
-.unit-rating span.r6-unit:hover{width:150px}
-.unit-rating span.r7-unit{left:150px}
-.unit-rating span.r7-unit:hover{width:175px}
-.unit-rating span.r8-unit{left:175px}
-.unit-rating span.r8-unit:hover{width:200px}
-.unit-rating span.r9-unit{left:200px}
-.unit-rating span.r9-unit:hover{width:225px}
-.unit-rating span.r10-unit{left:225px}
-.unit-rating span.r10-unit:hover{width:250px}
+.unit-rating .r1-unit{left:0}
+.unit-rating .r1-unit:hover{width:25px}
+.unit-rating .r2-unit{left:25px}
+.unit-rating .r2-unit:hover{width:50px}
+.unit-rating .r3-unit{left:50px}
+.unit-rating .r3-unit:hover{width:75px}
+.unit-rating .r4-unit{left:75px}
+.unit-rating .r4-unit:hover{width:100px}
+.unit-rating .r5-unit{left:100px}
+.unit-rating .r5-unit:hover{width:125px}
+.unit-rating .r6-unit{left:125px}
+.unit-rating .r6-unit:hover{width:150px}
+.unit-rating .r7-unit{left:150px}
+.unit-rating .r7-unit:hover{width:175px}
+.unit-rating .r8-unit{left:175px}
+.unit-rating .r8-unit:hover{width:200px}
+.unit-rating .r9-unit{left:200px}
+.unit-rating .r9-unit:hover{width:225px}
+.unit-rating .r10-unit{left:225px}
+.unit-rating .r10-unit:hover{width:250px}
 .unit-rating li.current-rating {
 	background: url(../images/trb/all_stars.png) left bottom;
 	position: absolute;

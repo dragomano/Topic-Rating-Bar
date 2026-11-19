@@ -77,29 +77,46 @@ function template_bar_above(): void
 	$footer = '
 	</div>';
 
-	if (! empty($context['proper_user'])) {
-		echo $header, '
-		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
-			<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px">
-				<span class="item"><span class="fn">', $context['subject'], '</span></span>
-				<span class="rating">
-					<span class="average">', $context['rating_bar']['current'], '</span>
-					<span class="worst">0</span>
-					<span class="best">', $count, '</span>
-				</span>
-				<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
-			</li>';
+	$canVote = ! empty($context['proper_user']) && empty($context['rating_bar']['voted']);
 
-		for ($i = 1; $i <= $context['rating_bar']['units']; $i++) {
-			if (empty($context['rating_bar']['voted']))
+	if (! empty($context['proper_user'])) {
+		echo $header;
+
+		if ($canVote)
+			echo '
+		<form method="post" action="', $scripturl, '?action=trb_rate" id="trb_form', $context['current_topic'], '" class="trb_rate_form">
+			<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '">
+			<input type="hidden" name="topic" value="', $context['current_topic'], '">';
+
+		echo '
+			<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
+				<li class="current-rating hreview-aggregate" style="width:', $context['rating_bar']['rating_width'], 'px">
+					<span class="item"><span class="fn">', $context['subject'], '</span></span>
+					<span class="rating">
+						<span class="average">', $context['rating_bar']['current'], '</span>
+						<span class="worst">0</span>
+						<span class="best">', $count, '</span>
+					</span>
+					<span class="votes">', is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0, '</span>
+				</li>';
+
+		if ($canVote) {
+			for ($i = 1; $i <= $context['rating_bar']['units']; $i++) {
 				echo '
-			<li>
-				<span title="', $rates[$i-1], '" class="r', $i, '-unit rater">', $i, '</span>
-			</li>';
+				<li data-star="', $i, '">
+					<button type="submit" name="stars" value="', $i, '" title="', htmlspecialchars($rates[$i-1]), '" class="r', $i, '-unit rater">', $i, '</button>
+				</li>';
+			}
 		}
 
 		echo '
-		</ul>', $footer;
+			</ul>';
+
+		if ($canVote)
+			echo '
+		</form>';
+
+		echo $footer;
 	} elseif (! empty($context['rating_bar']['current'])) {
 		echo $header, '
 		<ul id="unit_ul', $context['current_topic'], '" class="unit-rating" style="width:', $context['rating_bar']['unit_width'] * $context['rating_bar']['units'], 'px" title="', $txt['tr_currently'], $context['rating_bar']['current'], '/', $context['rating_bar']['units'], '">
@@ -115,41 +132,68 @@ function template_bar_above(): void
 		</ul>', $footer;
 	}
 
-	if (! empty($context['proper_user']) && empty($context['rating_bar']['voted']))
+	if ($canVote)
 		echo /** @lang text */ '
 	<script>
-		let work = smf_scripturl + "?action=trb_rate";
-		document.addEventListener("DOMContentLoaded", function() {
-			let elements = document.querySelectorAll("#unit_ul' . $context['current_topic'] . ' li > span");
-			elements.forEach(function(element) {
-				element.addEventListener("click", function() {
-					ajax_indicator(true);
-					let rating = this.textContent;
-					let xhr = new XMLHttpRequest();
-					xhr.open("POST", work, true);
-					xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-					xhr.send("stars=" + rating + "&topic=' . $context['current_topic'] . '&user=' . $context['user']['id'] . '");
-					xhr.onload = function() {
-						let unitUl = document.getElementById("unit_ul' . $context['current_topic'] . '");
-						unitUl.innerHTML = \'<ul id="unit_ul' . $context['current_topic'] . '" class="unit-rating" style="width:' . $context['rating_bar']['unit_width'] * $context['rating_bar']['units'] . 'px">\' +
-							\'<li class="current-rating hreview-aggregate" style="width:\' + (rating * ' . $context['rating_bar']['unit_width'] . ') + \'px">\' +
-							\'<span class="item"><span class="fn">' . htmlspecialchars($context['subject']) . '</span></span>\' +
-							\'<span class="rating">\' +
-							\'<span class="average">\' + rating + \'</span>\' +
-							\'</span>\' +
-							\'<span class="votes">' . (is_array($context['rating_bar']['users']) ? count($context['rating_bar']['users']) : 0) . '</span>\' +
-							\'</li></ul>\';
-						ajax_indicator(false);
-					};
-				});
+		document.addEventListener("DOMContentLoaded", function () {
+			const form = document.getElementById("trb_form' . $context['current_topic'] . '");
+
+			if (!form) {
+				return;
+			}
+
+			// Without JavaScript, the browser submits the form itself
+			form.addEventListener("submit", async function (event) {
+				if (!event.submitter || event.submitter.name !== "stars") {
+					return;
+				}
+
+				event.preventDefault();
+
+				const data = new FormData(form);
+				data.set("stars", event.submitter.value);
+
+				ajax_indicator(true);
+
+				try {
+					const response = await fetch(form.action, {
+						method: "POST",
+						body: data,
+						credentials: "same-origin",
+						headers: {
+							"X-Requested-With": "fetch",
+							"Accept": "application/json"
+						}
+					});
+
+					if (!response.ok) {
+						form.submit();
+						return;
+					}
+
+					const rating = await response.json();
+					const bar = document.getElementById("unit_ul' . $context['current_topic'] . '");
+					const current = bar.querySelector(".current-rating");
+
+					current.style.width = rating.width + "px";
+					current.querySelector(".average").textContent = rating.average;
+					current.querySelector(".votes").textContent = rating.votes;
+					bar.title = ' . JavaScriptEscape($txt['tr_currently']) . ' + rating.average + "/" + rating.units;
+
+					bar.querySelectorAll("li[data-star]").forEach(function (item) {
+						item.remove();
+					});
+				} catch (error) {
+					form.submit();
+				} finally {
+					ajax_indicator(false);
+				}
 			});
 		});
 	</script>';
 }
 
-function template_bar_below()
-{
-}
+function template_bar_below() {}
 
 function template_best_topics_above(): void
 {

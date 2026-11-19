@@ -5,7 +5,7 @@
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
 [![Crowdin](https://badges.crowdin.net/topic-rating-bar/localized.svg)](https://crowdin.com/project/topic-rating-bar)
 
-- **Tested on:** PHP 8.2.16 / MariaDB 10.11.6
+- **Tested on:** PHP 8.3.36 / MariaDB 11.8.5
 - **Languages:** English, Russian, Croatian, German, Hungarian, Portuguese, Serbian, Spanish, Romanian, Greek
 
 ## Description

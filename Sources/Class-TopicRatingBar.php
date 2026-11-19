@@ -220,7 +220,7 @@ final class TopicRatingBar
 	}
 
 	/**
-	 * Добавляем отображение рейтинга тем внутри разделов
+	 * Adds the topic rating display to the message index
 	 *
 	 * @hook integrate_messageindex_buttons
 	 */
@@ -256,55 +256,152 @@ final class TopicRatingBar
 	}
 
 	/**
-	 * Обработка оценки
+	 * Handles a rating submission
+	 *
+	 * Accepts POST only and requires a session token. Returns JSON for a fetch request,
+	 * and redirects back to the topic for a regular form submission (works without JavaScript).
 	 */
 	public function ratingControl(): void
 	{
 		global $modSettings, $context, $smcFunc;
 
-		$voteSent = (int) $_REQUEST['stars'];
-		$topic    = (int) $_REQUEST['topic'];
-		$userId   = (int) $_REQUEST['user'];
-		$units    = empty($modSettings['tr_rate_system']) ? 5 : 10;
+		$units  = empty($modSettings['tr_rate_system']) ? 5 : 10;
+		$isAjax = ! empty($_SERVER['HTTP_X_REQUESTED_WITH']) || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
 
-		if (empty($voteSent) || empty($topic) || empty($userId))
-			exit;
+		$topic    = (int) ($_POST['topic'] ?? 0);
+		$voteSent = (int) ($_POST['stars'] ?? 0);
+		$userId   = (int) $context['user']['id'];
+
+		if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+			if ($isAjax) {
+				$this->ratingJson(405, ['success' => false, 'error' => 'method_not_allowed']);
+			}
+
+			redirectexit();
+		}
+
+		// With $is_fatal = false, checkSession() returns an error string, or an empty string on success
+		if (checkSession('post', '', false) !== '') {
+			// Without JavaScript, let SMF display its own session error page
+			if (! $isAjax) {
+				checkSession('post');
+			}
+
+			$this->ratingJson(403, ['success' => false, 'error' => 'session']);
+		}
+
+		if ($userId === 0) {
+			if (! $isAjax && $topic > 0) {
+				redirectexit('topic=' . $topic . '.0');
+			}
+
+			$this->ratingJson(403, ['success' => false, 'error' => 'not_logged_in']);
+		}
+
+		if ($topic === 0 || $voteSent < 1 || $voteSent > $units) {
+			if (! $isAjax && $topic > 0) {
+				redirectexit('topic=' . $topic . '.0');
+			}
+
+			$this->ratingJson(400, ['success' => false, 'error' => 'invalid_request']);
+		}
+
+		// Rating permission and restrictions that used to be checked only when rendering the form
+		if (! allowedTo('rate_topics')) {
+			if (! $isAjax) {
+				redirectexit('topic=' . $topic . '.0');
+			}
+
+			$this->ratingJson(403, ['success' => false, 'error' => 'no_permission']);
+		}
+
+		$query = $smcFunc['db_query']('', '
+			SELECT t.id_member_started, mf.id_board
+			FROM {db_prefix}topics AS t
+				LEFT JOIN {db_prefix}messages AS mf ON (mf.id_msg = t.id_first_msg)
+			WHERE t.id_topic = {int:topic}
+			LIMIT 1',
+			[
+				'topic' => $topic,
+			],
+		);
+
+		$topicRow = $smcFunc['db_fetch_assoc']($query);
+
+		$smcFunc['db_free_result']($query);
+
+		if (empty($topicRow)) {
+			if (! $isAjax) {
+				redirectexit();
+			}
+
+			$this->ratingJson(400, ['success' => false, 'error' => 'invalid_request']);
+		}
+
+		// Users cannot rate their own topic — the same condition as in the template
+		if ((int) $topicRow['id_member_started'] === $userId) {
+			if (! $isAjax) {
+				redirectexit('topic=' . $topic . '.0');
+			}
+
+			$this->ratingJson(403, ['success' => false, 'error' => 'own_topic']);
+		}
+
+		$ignoredBoards = array_map('intval', $context['trb_ignored_boards'] ?? []);
+
+		if (in_array((int) $topicRow['id_board'], $ignoredBoards, true)) {
+			if (! $isAjax) {
+				redirectexit('topic=' . $topic . '.0');
+			}
+
+			$this->ratingJson(400, ['success' => false, 'error' => 'board_not_allowed']);
+		}
 
 		$ratingData     = $this->getTopicRatingData($topic);
 		$checkedUserIds = $this->getParsedUserIds($ratingData['user_ids']);
 
-		$voted = ! empty($checkedUserIds) && in_array($userId, $checkedUserIds);
-		$total = $voteSent + $ratingData['total_value'];
-		$votes = $total == 0 ? 0 : $ratingData['total_votes'] + 1;
+		if (in_array($userId, $checkedUserIds, true)) {
+			if (! $isAjax) {
+				redirectexit('topic=' . $topic . '.0');
+			}
 
-		$checkedUserIds[] = $userId;
-
-		$users = json_encode($checkedUserIds);
-
-		if (! $voted && ($voteSent >= 1 && $voteSent <= $units) && ($context['user']['id'] == $userId)) {
-			$smcFunc['db_insert']('replace',
-				'{db_prefix}topic_ratings',
-				[
-					'id'          => 'int',
-					'total_votes' => 'int',
-					'total_value' => 'int',
-					'user_ids'    => 'string',
-				],
-				[
-					$topic,
-					$votes,
-					$total,
-					$users,
-				],
-				['id'],
+			$this->ratingJson(
+				409,
+				['success' => false, 'error' => 'already_voted'] + $this->ratingPayload($ratingData['total_votes'], $ratingData['total_value'], $units),
 			);
 		}
 
-		exit;
+		$votes = $ratingData['total_votes'] + 1;
+		$total = $ratingData['total_value'] + $voteSent;
+
+		$checkedUserIds[] = $userId;
+
+		$smcFunc['db_insert']('replace',
+			'{db_prefix}topic_ratings',
+			[
+				'id'          => 'int',
+				'total_votes' => 'int',
+				'total_value' => 'int',
+				'user_ids'    => 'string',
+			],
+			[
+				$topic,
+				$votes,
+				$total,
+				json_encode($checkedUserIds),
+			],
+			['id'],
+		);
+
+		if (! $isAjax) {
+			redirectexit('topic=' . $topic . '.0');
+		}
+
+		$this->ratingJson(200, ['success' => true] + $this->ratingPayload($votes, $total, $units));
 	}
 
 	/**
-	 * Подготовка данных для таблицы с популярными темами
+	 * Prepares the data for the top rated topics table
 	 */
 	public function ratingTop(): void
 	{
@@ -341,7 +438,7 @@ final class TopicRatingBar
 		);
 
 		$context['top_rating'] = [];
-		while ($row = $smcFunc['db_fetch_assoc']($query))
+		while ($row = $smcFunc['db_fetch_assoc']($query)) {
 			$context['top_rating'][$row['id']] = [
 				'topic'  => '<a href="' . $scripturl . '?topic=' . $row['id'] . '.0">' . $row['subject'] . '</a>',
 				'board'  => '<a href="' . $scripturl . '?board=' . $row['id_board'] . '.0">' . $row['name'] . '</a>',
@@ -350,12 +447,13 @@ final class TopicRatingBar
 				'rating' => number_format($row['total_value'] / $row['total_votes'], 2),
 				'votes'  => $row['total_votes'],
 			];
+		}
 
 		$smcFunc['db_free_result']($query);
 	}
 
 	/**
-	 * Отображение блока с рейтинговыми темами на главной странице форума
+	 * Displays the top rated topics block on the forum index
 	 */
 	public function showBestTopic(array $buttons): void
 	{
@@ -370,7 +468,7 @@ final class TopicRatingBar
 			if (! empty($context['best_topic']))	{
 				loadTemplate('TopicRatingBar');
 
-				// Убедимся, что наш блок будет выше блоков портала
+				// Make sure our block is placed above the portal blocks
 				if (isset($context['template_layers'][2]) && $context['template_layers'][2] === 'portal') {
 					$context['template_layers'][]  = 'portal';
 					$context['template_layers'][2] = 'best_topics';
@@ -382,7 +480,7 @@ final class TopicRatingBar
 	}
 
 	/**
-	 * Отображаем панель со звёздочками внутри темы
+	 * Displays the star rating bar inside a topic
 	 */
 	public function showRatingBar(): void
 	{
@@ -395,10 +493,9 @@ final class TopicRatingBar
 			return;
 
 		$ratingData = $this->getTopicRatingData();
-
-		$rating = ($ratingData['total_votes'] == 0) ? 0 : number_format($ratingData['total_value'] / $ratingData['total_votes']);
-		$users  = $this->getParsedUserIds($ratingData['user_ids']);
-		$voted  = ! empty($users) && in_array($context['user']['id'], $users);
+		$rating     = ($ratingData['total_votes'] == 0) ? 0 : number_format($ratingData['total_value'] / $ratingData['total_votes']);
+		$users      = $this->getParsedUserIds($ratingData['user_ids']);
+		$voted      = ! empty($users) && in_array($context['user']['id'], $users);
 
 		$context['rating_bar'] = [
 			'current'      => $rating,
@@ -420,7 +517,35 @@ final class TopicRatingBar
 	}
 
 	/**
-	 * Получаем данные о текущих оценках темы
+	 * Data for updating the rating bar
+	 */
+	private function ratingPayload(int $votes, int $total, int $units): array
+	{
+		$average = $votes > 0 ? (int) round($total / $votes) : 0;
+
+		return [
+			'average' => $average,
+			'votes'   => $votes,
+			'width'   => $average * self::UNIT_WIDTH,
+			'units'   => $units,
+		];
+	}
+
+	/**
+	 * Sends a JSON response and terminates the request
+	 */
+	private function ratingJson(int $status, array $data): void
+	{
+		header('Content-Type: application/json; charset=utf-8', true, $status);
+		header('X-Content-Type-Options: nosniff');
+
+		echo json_encode($data, JSON_UNESCAPED_UNICODE);
+
+		exit;
+	}
+
+	/**
+	 * Gets the current rating data of a topic
 	 */
 	private function getTopicRatingData(int $topic = 0): array
 	{
@@ -452,7 +577,7 @@ final class TopicRatingBar
 	}
 
 	/**
-	 * Получаем массив с идентификаторами пользователей
+	 * Gets an array of user IDs
 	 */
 	private function getParsedUserIds(?string $data): array
 	{
